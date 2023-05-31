@@ -1,3 +1,11 @@
 databaseChangeLog:
   - include:
-      file: liquibase/scripts/init.sql
+      file: liquibase/scripts/cats.sql
+  - include:
+      file: liquibase/scripts/dogs.sql
+  - include:
+      file: liquibase/scripts/cat_persons.sql
+  - include:
+      file: liquibase/scripts/dog_persons.sql
+  - include:
+      file: liquibase/scripts/last_commands.sql

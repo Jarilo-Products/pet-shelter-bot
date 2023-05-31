@@ -31,6 +31,7 @@ services:
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
+      TG_TOKEN: 6192284330:AAE_4ry-OrhcdOGjbeMTnDOxdjJgzONOVDA
     depends_on:
       database:
         condition: service_healthy
