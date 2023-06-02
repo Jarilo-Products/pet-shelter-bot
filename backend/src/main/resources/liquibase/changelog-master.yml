@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - include:
+      file: liquibase/scripts/pets.sql
+  - include:
+      file: liquibase/scripts/persons.sql
+  - include:
+      file: liquibase/scripts/last_commands.sql
+  - include:
+      file: liquibase/scripts/reports.sql
