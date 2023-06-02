@@ -97,7 +97,13 @@ public class TextMessageProcessor {
   // + написать на свой метод javadoc
 
   private void processInfoCommand(LastCommand lastCommand) {
-    // Лера – /info
+    if (lastCommand.getActiveType() == Type.CAT) {
+      String message = ANSWERS.get("info_cat");
+      sendMessage(lastCommand.getChatId(), message);
+    } else {
+      String message = ANSWERS.get("info_dog");
+      sendMessage(lastCommand.getChatId(), message);
+    }
   }
 
   private void processHowToPetCommand(LastCommand lastCommand) {
