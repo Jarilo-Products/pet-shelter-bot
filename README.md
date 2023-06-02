@@ -11,7 +11,6 @@
 ## Стек технологий
 - Spring Boot
 - PostgreSQL
-- Hibernate
 - Liquibase
 
 ## Команды для работы с докером
