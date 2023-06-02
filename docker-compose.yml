@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: pet_shelter
     healthcheck:
-      test: pg_isready -U postgres -d events
+      test: pg_isready -U postgres -d pet_shelter
       interval: 1s
       timeout: 500ms
       start_period: 0s
