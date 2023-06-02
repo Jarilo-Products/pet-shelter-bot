@@ -52,6 +52,7 @@ public class TextMessageProcessor {
         case "/start" -> processStartCommand(lastCommand);
       }
     }
+    lastCommandService.save(lastCommand);
   }
 
   private void processFirstStartCommand(long chatId) {
@@ -61,7 +62,6 @@ public class TextMessageProcessor {
     lastCommand.setChatId(chatId);
     lastCommand.setLastCommand("/start");
     lastCommand.setIsClosed(false);
-    lastCommandService.save(lastCommand);
   }
 
   private void processStartCommand(LastCommand lastCommand) {
@@ -69,7 +69,6 @@ public class TextMessageProcessor {
     sendMessage(lastCommand.getChatId(), message);
     lastCommand.setLastCommand("/start");
     lastCommand.setIsClosed(false);
-    lastCommandService.save(lastCommand);
   }
 
   private void processChoosingShelter(LastCommand lastCommand, String text) {
@@ -78,13 +77,11 @@ public class TextMessageProcessor {
         sendMessage(lastCommand.getChatId(), ANSWERS.get("chosen_cat"));
         lastCommand.setIsClosed(true);
         lastCommand.setActiveType(Type.CAT);
-        lastCommandService.save(lastCommand);
       }
       case "2" -> {
         sendMessage(lastCommand.getChatId(), ANSWERS.get("chosen_dog"));
         lastCommand.setIsClosed(true);
         lastCommand.setActiveType(Type.DOG);
-        lastCommandService.save(lastCommand);
       }
       default -> processStartCommand(lastCommand);
     }
