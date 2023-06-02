@@ -65,6 +65,7 @@ public class TextMessageProcessor {
     lastCommand.setChatId(chatId);
     lastCommand.setLastCommand("/start");
     lastCommand.setIsClosed(false);
+    lastCommandService.save(lastCommand);
   }
 
   private void processStartCommand(LastCommand lastCommand) {
