@@ -23,4 +23,8 @@ public class LastCommandService {
     return Optional.ofNullable(lastCommand);
   }
 
+  public void save(LastCommand lastCommand) {
+    lastCommandRepository.save(lastCommand);
+  }
+
 }

@@ -3,14 +3,11 @@ package pro.sky.petshelterbot.processor;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pro.sky.petshelterbot.listener.TelegramBotUpdatesListener;
 import pro.sky.petshelterbot.model.LastCommand;
 import pro.sky.petshelterbot.model.enums.Type;
-import pro.sky.petshelterbot.repository.LastCommandRepository;
 import pro.sky.petshelterbot.service.LastCommandService;
 
 import java.util.Optional;
@@ -18,41 +15,39 @@ import java.util.Optional;
 import static pro.sky.petshelterbot.utility.TextUtils.ANSWERS;
 
 @Component
+@Slf4j
 public class TextMessageProcessor {
 
-  private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
-
   private final TelegramBot telegramBot;
-
   private final LastCommandService lastCommandService;
-  private final LastCommandRepository lastCommandRepository;
 
   @Autowired
   public TextMessageProcessor(TelegramBot telegramBot,
-                              LastCommandService lastCommandService,
-                              LastCommandRepository lastCommandRepository) {
+                              LastCommandService lastCommandService) {
     this.telegramBot = telegramBot;
     this.lastCommandService = lastCommandService;
-    this.lastCommandRepository = lastCommandRepository;
   }
 
   public void processTextMessage(long chatId, String text) {
     Optional<LastCommand> optionalLastCommand = lastCommandService.getByChatId(chatId);
+    // Пользователь в первый раз зашел в бота и ввел какую-то хрень
     if (optionalLastCommand.isEmpty() && !text.equalsIgnoreCase("/start")) {
       return;
     }
+    // Пользователь в первый раз зашел в бота и ввел "/start"
     if (optionalLastCommand.isEmpty()) {
       processFirstStartCommand(chatId);
       return;
     }
 
+    // Если дошли до сюда, то пользователь уже общался с ботом
     LastCommand lastCommand = optionalLastCommand.get();
-    if (!lastCommand.getIsClosed()) {
+    if (!lastCommand.getIsClosed()) { // Обработка последних команд пользователя со статусом is_closed = false
       switch (lastCommand.getLastCommand()) {
         case "/start" -> processChoosingShelter(lastCommand, text);
 
       }
-    } else {
+    } else { // Обработка последних команд пользователя со статусом is_closed = true
       switch (text) {
         case "/start" -> processStartCommand(lastCommand);
       }
@@ -66,7 +61,7 @@ public class TextMessageProcessor {
     lastCommand.setChatId(chatId);
     lastCommand.setLastCommand("/start");
     lastCommand.setIsClosed(false);
-    lastCommandRepository.save(lastCommand);
+    lastCommandService.save(lastCommand);
   }
 
   private void processStartCommand(LastCommand lastCommand) {
@@ -74,7 +69,7 @@ public class TextMessageProcessor {
     sendMessage(lastCommand.getChatId(), message);
     lastCommand.setLastCommand("/start");
     lastCommand.setIsClosed(false);
-    lastCommandRepository.save(lastCommand);
+    lastCommandService.save(lastCommand);
   }
 
   private void processChoosingShelter(LastCommand lastCommand, String text) {
@@ -83,13 +78,13 @@ public class TextMessageProcessor {
         sendMessage(lastCommand.getChatId(), ANSWERS.get("chosen_cat"));
         lastCommand.setIsClosed(true);
         lastCommand.setActiveType(Type.CAT);
-        lastCommandRepository.save(lastCommand);
+        lastCommandService.save(lastCommand);
       }
       case "2" -> {
         sendMessage(lastCommand.getChatId(), ANSWERS.get("chosen_dog"));
         lastCommand.setIsClosed(true);
         lastCommand.setActiveType(Type.DOG);
-        lastCommandRepository.save(lastCommand);
+        lastCommandService.save(lastCommand);
       }
       default -> processStartCommand(lastCommand);
     }
@@ -101,7 +96,7 @@ public class TextMessageProcessor {
     SendMessage sendMessage = new SendMessage(chatId, message);
     SendResponse sendResponse = telegramBot.execute(sendMessage);
     if (!sendResponse.isOk()) {
-      logger.error("Error during sending message: {}", sendResponse.description());
+      log.error("Error during sending message: {}", sendResponse.description());
     }
   }
 
