@@ -50,6 +50,9 @@ public class TextMessageProcessor {
     } else { // Обработка последних команд пользователя со статусом is_closed = true
       switch (text) {
         case "/start" -> processStartCommand(lastCommand);
+        case "/info" -> processInfoCommand(lastCommand);
+        case "/howtopet" -> processHowToPetCommand(lastCommand);
+        case "/sendreport" -> processSendReportCommand(lastCommand);
       }
     }
     lastCommandService.save(lastCommand);
@@ -87,7 +90,22 @@ public class TextMessageProcessor {
     }
   }
 
-  // YOUR METHODS
+  // TODO: написать методы (3 шт.) обработки команд /info, /howtopet и /sendreport
+  // на каждую из команд пользователю выдается сообщение из мапы ANSWERS
+  // в соответствии с выбранным приютом (из таблицы last_commands)
+  // + написать на свой метод javadoc
+
+  private void processInfoCommand(LastCommand lastCommand) {
+    // Лера – /info
+  }
+
+  private void processHowToPetCommand(LastCommand lastCommand) {
+    // Оля – /howtopet
+  }
+
+  private void processSendReportCommand(LastCommand lastCommand) {
+    // Женя – /sendreport
+  }
 
   private void sendMessage(long chatId, String message) {
     SendMessage sendMessage = new SendMessage(chatId, message);
