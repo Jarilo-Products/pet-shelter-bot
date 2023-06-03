@@ -101,7 +101,15 @@ public class TextMessageProcessor {
   }
 
   private void processHowToPetCommand(LastCommand lastCommand) {
-    // Оля – /howtopet
+    // Пользователь может выбрать необходимую информацию по уходу и оформлению
+    String message;
+    if (lastCommand.getActiveType() == Type.CAT) {
+      message = ANSWERS.get("howtopet_cat");
+      sendMessage(lastCommand.getChatId(), message);
+    } else {
+      message = ANSWERS.get("howtopet_dog");
+      sendMessage(lastCommand.getChatId(), message);
+    }
   }
 
   private void processSendReportCommand(LastCommand lastCommand) {
