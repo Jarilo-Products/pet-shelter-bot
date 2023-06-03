@@ -100,9 +100,13 @@ public class TextMessageProcessor {
     // Лера – /info
   }
 
+  /**
+   * Отправляет информацию по выбранному пункту из меню "Как взять животное из приюта"
+   * @param lastCommand последняя команда пользователя
+   */
   private void processHowToPetCommand(LastCommand lastCommand) {
     // Пользователь может выбрать необходимую информацию по уходу и оформлению
-    String message;
+      String message;
     if (lastCommand.getActiveType() == Type.CAT) {
       message = ANSWERS.get("howtopet_cat");
       sendMessage(lastCommand.getChatId(), message);
