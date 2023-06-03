@@ -28,6 +28,11 @@ public class TextMessageProcessor {
     this.lastCommandService = lastCommandService;
   }
 
+  /**
+   * Обработка текстового сообщения от пользователя бота
+   * @param chatId id чата
+   * @param text текст сообщения
+   */
   public void processTextMessage(long chatId, String text) {
     Optional<LastCommand> optionalLastCommand = lastCommandService.getByChatId(chatId);
     // Пользователь в первый раз зашел в бота и ввел какую-то хрень
@@ -58,6 +63,10 @@ public class TextMessageProcessor {
     lastCommandService.save(lastCommand);
   }
 
+  /**
+   * Обработка команды <code>/start</code> при первом использованием бота
+   * @param chatId id чата
+   */
   private void processFirstStartCommand(long chatId) {
     String message = ANSWERS.get("start");
     sendMessage(chatId, message);
@@ -68,6 +77,14 @@ public class TextMessageProcessor {
     lastCommandService.save(lastCommand);
   }
 
+  /**
+   * Обработка команды <code>/start</code> если пользователь до этого уже запускал эту команду
+   * @param lastCommand сущность, содержащая информацию о последней команде пользователя
+   *                    и о последнем выбранном приюте. Также содержит флаг <code>isClosed</code>,
+   *                    сигнализирующий о том, что пользователь может использовать другие команды.
+   *                    Если <code>isClosed == false</code>, то пользователь должен завершить
+   *                    использование последней команды.
+   */
   private void processStartCommand(LastCommand lastCommand) {
     String message = ANSWERS.get("start_registered");
     sendMessage(lastCommand.getChatId(), message);
@@ -75,6 +92,16 @@ public class TextMessageProcessor {
     lastCommand.setIsClosed(false);
   }
 
+  /**
+   * Метод определяет какой приют был выбран в зависимости от значения <code>text</code>
+   * @param lastCommand сущность, содержащая информацию о последней команде пользователя
+   *                    и о последнем выбранном приюте. Также содержит флаг <code>isClosed</code>,
+   *                    сигнализирующий о том, что пользователь может использовать другие команды.
+   *                    Если <code>isClosed == false</code>, то пользователь должен завершить
+   *                    использование последней команды.
+   * @param text "1" – приют для кошек, "2" – приют для собак. При любом другом значении предлагается
+   *             повторно выбрать приют (вызывается метод {@link TextMessageProcessor#processStartCommand})
+   */
   private void processChoosingShelter(LastCommand lastCommand, String text) {
     switch (text.trim()) {
       case "1" -> {
