@@ -96,8 +96,18 @@ public class TextMessageProcessor {
   // в соответствии с выбранным приютом (из таблицы last_commands)
   // + написать на свой метод javadoc
 
+  /**
+   * Отправляет информацию по выбранному пункту меню "Узнать информацию о приюте"
+   * @param lastCommand последняя команда пользователя
+   */
   private void processInfoCommand(LastCommand lastCommand) {
-    // Лера – /info
+    if (lastCommand.getActiveType() == Type.CAT) {
+      String message = ANSWERS.get("info_cat");
+      sendMessage(lastCommand.getChatId(), message);
+    } else {
+      String message = ANSWERS.get("info_dog");
+      sendMessage(lastCommand.getChatId(), message);
+    }
   }
 
   private void processHowToPetCommand(LastCommand lastCommand) {
