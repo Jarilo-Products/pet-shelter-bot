@@ -110,8 +110,20 @@ public class TextMessageProcessor {
     }
   }
 
+  /**
+   * Отправляет информацию по выбранному пункту из меню "Как взять животное из приюта"
+   * @param lastCommand последняя команда пользователя
+   */
   private void processHowToPetCommand(LastCommand lastCommand) {
-    // Оля – /howtopet
+    // Пользователь может выбрать необходимую информацию по уходу и оформлению
+      String message;
+    if (lastCommand.getActiveType() == Type.CAT) {
+      message = ANSWERS.get("howtopet_cat");
+      sendMessage(lastCommand.getChatId(), message);
+    } else {
+      message = ANSWERS.get("howtopet_dog");
+      sendMessage(lastCommand.getChatId(), message);
+    }
   }
 
   /**
