@@ -114,8 +114,18 @@ public class TextMessageProcessor {
     // Оля – /howtopet
   }
 
+  /**
+   * Отправляет информацию по выбранному пункту из меню "Прислать отчет о питомце"
+   * @param lastCommand последняя команда пользователя
+   */
   private void processSendReportCommand(LastCommand lastCommand) {
-    // Женя – /sendreport
+    String message;
+    if (lastCommand.getActiveType() == Type.CAT) {
+      message = ANSWERS.get("sendreport_cat");
+    } else {
+      message = ANSWERS.get("sendreport_dog");
+    }
+    sendMessage(lastCommand.getChatId(), message);
   }
 
   private void sendMessage(long chatId, String message) {
