@@ -18,6 +18,14 @@ import static pro.sky.petshelterbot.utility.TextUtils.ANSWERS;
 @Slf4j
 public class TextMessageProcessor {
 
+  /**
+   * Сообщение о том, что пользователь ввел необрабатываемую команду.
+   */
+  private final String UNKNOWN_COMMAND = """
+      К сожалению, бот не знает что ответить :(
+      Используйте команду /volunteer для вызова волонтера
+      """;
+
   private final TelegramBot telegramBot;
   private final LastCommandService lastCommandService;
 
@@ -55,9 +63,7 @@ public class TextMessageProcessor {
     } else { // Обработка последних команд пользователя со статусом is_closed = true
       switch (text) {
         case "/start" -> processStartCommand(lastCommand);
-        case "/info" -> processInfoCommand(lastCommand);
-        case "/howtopet" -> processHowToPetCommand(lastCommand);
-        case "/sendreport" -> processSendReportCommand(lastCommand);
+        default -> processSingleAnswerCommand(text, lastCommand);
       }
     }
     lastCommandService.save(lastCommand);
@@ -68,7 +74,7 @@ public class TextMessageProcessor {
    * @param chatId id чата
    */
   private void processFirstStartCommand(long chatId) {
-    String message = ANSWERS.get("start");
+    String message = ANSWERS.get("/start");
     sendMessage(chatId, message);
     LastCommand lastCommand = new LastCommand();
     lastCommand.setChatId(chatId);
@@ -86,7 +92,7 @@ public class TextMessageProcessor {
    *                    использование последней команды.
    */
   private void processStartCommand(LastCommand lastCommand) {
-    String message = ANSWERS.get("start_registered");
+    String message = ANSWERS.get("/start_registered");
     sendMessage(lastCommand.getChatId(), message);
     lastCommand.setLastCommand("/start");
     lastCommand.setIsClosed(false);
@@ -105,12 +111,12 @@ public class TextMessageProcessor {
   private void processChoosingShelter(LastCommand lastCommand, String text) {
     switch (text.trim()) {
       case "1" -> {
-        sendMessage(lastCommand.getChatId(), ANSWERS.get("chosen_cat"));
+        sendMessage(lastCommand.getChatId(), ANSWERS.get("/chosen_CAT"));
         lastCommand.setIsClosed(true);
         lastCommand.setActiveType(Type.CAT);
       }
       case "2" -> {
-        sendMessage(lastCommand.getChatId(), ANSWERS.get("chosen_dog"));
+        sendMessage(lastCommand.getChatId(), ANSWERS.get("/chosen_DOG"));
         lastCommand.setIsClosed(true);
         lastCommand.setActiveType(Type.DOG);
       }
@@ -119,47 +125,28 @@ public class TextMessageProcessor {
   }
 
   /**
-   * Отправляет информацию по выбранному пункту меню "Узнать информацию о приюте"
-   * @param lastCommand последняя команда пользователя
+   * Обработка команд, требующих лишь отправки определенного текста. Если команда найдена
+   * в {@link pro.sky.petshelterbot.utility.TextUtils#ANSWERS ANSWERS}, то она будет записана в <code>lastCommand</code>
+   * (<code>isClosed == true</code>)
+   * @param command команда, вызванная пользователем <i>(e.g. "/info")</i>.
+   *                Если в {@link pro.sky.petshelterbot.utility.TextUtils#ANSWERS ANSWERS} не найдется
+   *                подходящего ответа, то пользователю будет отправлено сообщение
+   *                {@link TextMessageProcessor#UNKNOWN_COMMAND}
+   * @param lastCommand сущность, содержащая информацию о последней команде пользователя
+   *                    и о последнем выбранном приюте. Также содержит флаг <code>isClosed</code>,
+   *                    сигнализирующий о том, что пользователь может использовать другие команды.
+   *                    Если <code>isClosed == false</code>, то пользователь должен завершить
+   *                    использование последней команды.
    */
-  private void processInfoCommand(LastCommand lastCommand) {
-    if (lastCommand.getActiveType() == Type.CAT) {
-      String message = ANSWERS.get("info_cat");
-      sendMessage(lastCommand.getChatId(), message);
-    } else {
-      String message = ANSWERS.get("info_dog");
-      sendMessage(lastCommand.getChatId(), message);
-    }
-  }
-
-  /**
-   * Отправляет информацию по выбранному пункту из меню "Как взять животное из приюта"
-   * @param lastCommand последняя команда пользователя
-   */
-  private void processHowToPetCommand(LastCommand lastCommand) {
-    // Пользователь может выбрать необходимую информацию по уходу и оформлению
-      String message;
-    if (lastCommand.getActiveType() == Type.CAT) {
-      message = ANSWERS.get("howtopet_cat");
-      sendMessage(lastCommand.getChatId(), message);
-    } else {
-      message = ANSWERS.get("howtopet_dog");
-      sendMessage(lastCommand.getChatId(), message);
-    }
-  }
-
-  /**
-   * Отправляет информацию по выбранному пункту из меню "Прислать отчет о питомце"
-   * @param lastCommand последняя команда пользователя
-   */
-  private void processSendReportCommand(LastCommand lastCommand) {
-    String message;
-    if (lastCommand.getActiveType() == Type.CAT) {
-      message = ANSWERS.get("sendreport_cat");
-    } else {
-      message = ANSWERS.get("sendreport_dog");
+  private void processSingleAnswerCommand(String command, LastCommand lastCommand) {
+    String message = ANSWERS.get(command + "_" + lastCommand.getActiveType().name());
+    if (message == null) {
+      sendMessage(lastCommand.getChatId(), UNKNOWN_COMMAND);
+      return;
     }
     sendMessage(lastCommand.getChatId(), message);
+    lastCommand.setLastCommand(command);
+    lastCommand.setIsClosed(true);
   }
 
   private void sendMessage(long chatId, String message) {
