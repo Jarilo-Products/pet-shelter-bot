@@ -21,4 +21,12 @@ public class PersonService {
     return personRepository.findAll();
   }
 
+  public List<Person> getVolunteers() {
+    return personRepository.getPeopleByIsVolunteerIsTrue();
+  }
+
+  public boolean isChatOfVolunteer(Long chatId) {
+    return personRepository.getPersonByChatIdAndIsVolunteerIsTrue(chatId) != null;
+  }
+
 }
