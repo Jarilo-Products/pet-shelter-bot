@@ -5,20 +5,39 @@ import org.springframework.stereotype.Service;
 import pro.sky.petshelterbot.model.Person;
 import pro.sky.petshelterbot.repository.PersonRepository;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
 @Service
 public class PersonService {
 
-  private final PersonRepository personRepository;
+    private final PersonRepository personRepository;
 
-  @Autowired
-  public PersonService(PersonRepository personRepository) {
-    this.personRepository = personRepository;
-  }
+    @Autowired
+    public PersonService(PersonRepository personRepository) {
+        this.personRepository = personRepository;
+    }
 
-  public List<Person> getAll() {
-    return personRepository.findAll();
-  }
+    public List<Person> getAll() {
+        return personRepository.findAll();
+    }
+
+    public List<Person> getAllVolunteer() {
+        return personRepository.getPersonByIsVolunteerIsTrue();
+    }
+
+    public Person setPersonIsVolunteerIsTrue(Long id) {
+        Person person = personRepository.findPersonById(id);
+        person.setIsVolunteer(true);
+        return personRepository.save(person);
+    }
+
+    public Person setPersonIsVolunteerIsFalse(Long id) {
+        Person person = personRepository.findPersonById(id);
+        person.setIsVolunteer(false);
+        return personRepository.save(person);
+    }
 
 }
