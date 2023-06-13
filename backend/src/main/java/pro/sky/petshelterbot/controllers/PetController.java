@@ -27,7 +27,7 @@ public class PetController {
         this.petService = petService;
     }
 
-    @GetMapping("/getAll")
+    @GetMapping()
     @Operation(
             summary = "Позволяет увидеть всех питомцев.",
             description = "Можно увидеть всех питомцев, соответсвующих схемой обекта Pet"
@@ -38,7 +38,7 @@ public class PetController {
                     description = "питомцы находящиеся в приютах найдены"
             ),
             @ApiResponse(
-                    responseCode = "400",
+                    responseCode = "204",
                     description = "в данный момент нет ни одного питомца"
             ),
             @ApiResponse(
@@ -51,11 +51,11 @@ public class PetController {
         if (!pets.isEmpty())  {
             return ResponseEntity.ok(pets);
         } else {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.noContent().build();
         }
     }
 
-    @GetMapping("/getPet/{id}")
+    @GetMapping("/{id}")
     @Operation(
             summary = "Возвращает питомца найденного по id.",
             description = "Можно получить питомца в соответствии с его id"
@@ -74,10 +74,10 @@ public class PetController {
                     description = "произошла ошибка, не зависящая от вызывающей стороны"
             )
     })
-    public ResponseEntity<Optional<Pet>> getPet(@PathVariable Long id){
+    public ResponseEntity<Pet> getPet(@PathVariable Long id){
         Optional<Pet> pet = petService.getPetById(id);
         if (pet.isPresent())  {
-            return ResponseEntity.ok(pet);
+            return ResponseEntity.ok(pet.get());
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -118,7 +118,7 @@ public class PetController {
     public ResponseEntity<Pet> addPet(@RequestBody @Validated Pet pet) {
         pet.setStatus(Status.OWNERLESS);
         petService.save(pet);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(pet);
 
     }
 
@@ -155,10 +155,10 @@ public class PetController {
                     description = "произошла ошибка, не зависящая от вызывающей стороны"
             )
     })
-    public ResponseEntity<Integer> editPet(@RequestBody @Validated Pet pet, @PathVariable Long id) {
+    public ResponseEntity<Pet> editPet(@RequestBody @Validated Pet pet, @PathVariable Long id) {
         if (petService.getPetById(id).isPresent() && Objects.equals(pet.getId(), id)) {
             petService.save(pet);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok().body(pet);
         }
         else {
             return ResponseEntity.notFound().build();
@@ -187,7 +187,7 @@ public class PetController {
     public ResponseEntity<Object> deletePet(@PathVariable Long id) {
         if (petService.getPetById(id).isPresent())  {
             petService.delete(id);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok().body(petService.getPetById(id));
         } else {
             return ResponseEntity.notFound().build();
         }
