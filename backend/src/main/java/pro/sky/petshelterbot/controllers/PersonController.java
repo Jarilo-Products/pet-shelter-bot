@@ -23,7 +23,7 @@ public class PersonController {
         this.personService = personService;
     }
 
-    @GetMapping("/getAll")
+    @GetMapping()
     @Operation(
             summary = "Получаем всех людей.",
             description = "Можно получить все личности, соответсвующие обекту Person")
@@ -33,7 +33,7 @@ public class PersonController {
                     description = " находящиеся личности в базе усыновителей найдены"
             ),
             @ApiResponse(
-                    responseCode = "400",
+                    responseCode = "204",
                     description = "в данный момент нет ни одной личности"
             ),
             @ApiResponse(
@@ -46,11 +46,11 @@ public class PersonController {
         if (!personList.isEmpty()) {
             return ResponseEntity.ok(personList);
         } else {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.noContent().build();
         }
     }
 
-    @GetMapping("/volunteers/getAll")
+    @GetMapping("/volunteers")
     @Operation(
             summary = "Получаем всех волентеров.",
             description = "Можно получить всех волонтеров, работающих в приюте")
@@ -60,7 +60,7 @@ public class PersonController {
                     description = " находящиеся личности в базе волонтеров найдены"
             ),
             @ApiResponse(
-                    responseCode = "400",
+                    responseCode = "204",
                     description = "в данный момент нет ни одного волонтера"
             ),
             @ApiResponse(
@@ -73,7 +73,7 @@ public class PersonController {
         if (!allVolunteer.isEmpty()) {
             return ResponseEntity.ok(allVolunteer);
         } else {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.noContent().build();
         }
     }
 
@@ -88,7 +88,7 @@ public class PersonController {
                     description = "удалось присвоить статус"
             ),
             @ApiResponse(
-                    responseCode = "404",
+                    responseCode = "204",
                     description = "личности с данным id не существует в базе"
             ),
             @ApiResponse(
@@ -97,8 +97,7 @@ public class PersonController {
             )
     })
     public ResponseEntity<Object> changeIsVolunteerIsTrue(@RequestBody @Validated Person person, @PathVariable Long id) {
-        if (Objects.equals(person.getId(), id)) {
-            personService.setPersonIsVolunteerIsTrue(id);
+        if (Objects.equals(person.getId(), id) && personService.setPersonIsVolunteerIsTrue(id)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
@@ -125,8 +124,7 @@ public class PersonController {
             )
     })
     public ResponseEntity<Object> changeIsVolunteerIsFalse(@RequestBody @Validated Person person, @PathVariable Long id) {
-        if (Objects.equals(person.getId(), id)) {
-            personService.setPersonIsVolunteerIsFalse(id);
+        if (Objects.equals(person.getId(), id) && personService.setPersonIsVolunteerIsTrue(id)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();

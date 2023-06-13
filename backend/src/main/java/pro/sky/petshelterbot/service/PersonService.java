@@ -28,16 +28,24 @@ public class PersonService {
         return personRepository.getPersonByIsVolunteerIsTrue();
     }
 
-    public Person setPersonIsVolunteerIsTrue(Long id) {
+    public boolean setPersonIsVolunteerIsTrue(Long id) {
         Person person = personRepository.findPersonById(id);
+        if (person == null) {
+            return false;
+        }
         person.setIsVolunteer(true);
-        return personRepository.save(person);
+        personRepository.save(person);
+        return true;
     }
 
-    public Person setPersonIsVolunteerIsFalse(Long id) {
+    public boolean setPersonIsVolunteerIsFalse(Long id) {
         Person person = personRepository.findPersonById(id);
+        if (person == null) {
+            return false;
+        }
         person.setIsVolunteer(false);
-        return personRepository.save(person);
+        personRepository.save(person);
+        return true;
     }
 
 }
