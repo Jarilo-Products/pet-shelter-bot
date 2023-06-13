@@ -185,9 +185,10 @@ public class PetController {
             )
     })
     public ResponseEntity<Object> deletePet(@PathVariable Long id) {
-        if (petService.getPetById(id).isPresent())  {
+        Optional<Pet> pet = petService.getPetById(id);
+        if (pet.isPresent())  {
             petService.delete(id);
-            return ResponseEntity.ok().body(petService.getPetById(id));
+            return ResponseEntity.ok().body(pet.get());
         } else {
             return ResponseEntity.notFound().build();
         }
