@@ -124,7 +124,7 @@ public class PersonController {
             )
     })
     public ResponseEntity<Object> changeIsVolunteerIsFalse(@RequestBody @Validated Person person, @PathVariable Long id) {
-        if (Objects.equals(person.getId(), id) && personService.setPersonIsVolunteerIsTrue(id)) {
+        if (Objects.equals(person.getId(), id) && personService.setPersonIsVolunteerIsFalse(id)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
