@@ -21,4 +21,7 @@ public class PersonService {
     return personRepository.findAll();
   }
 
+  public void save(Person person) {
+    personRepository.save(person);
+  }
 }
