@@ -11,27 +11,27 @@ import java.util.Optional;
 @Service
 public class PetService {
 
-   private final PetRepository petRepository;
+  private final PetRepository petRepository;
 
-    @Autowired
-    public PetService(PetRepository petRepository) {
-        this.petRepository = petRepository;
-    }
+  @Autowired
+  public PetService(PetRepository petRepository) {
+    this.petRepository = petRepository;
+  }
 
-    public Optional<Pet> getPetById(Long id) {
-        Pet pet = petRepository.findPetById(id);
-        return Optional.ofNullable(pet);
-    }
+  public Optional<Pet> getPetById(Long id) {
+    Pet pet = petRepository.findPetById(id);
+    return Optional.ofNullable(pet);
+  }
 
-    public List<Pet> getAll(){
-        return petRepository.findAll();
-    }
+  public List<Pet> getAll() {
+    return petRepository.findAll();
+  }
 
-    public void save(Pet pet) {
-        petRepository.save(pet);
-    }
+  public void save(Pet pet) {
+    petRepository.save(pet);
+  }
 
-    public void delete(Long id){
-        petRepository.deletePetById(id);
-    }
+  public void delete(Long id) {
+    petRepository.deletePetById(id);
+  }
 }

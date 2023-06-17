@@ -5,48 +5,40 @@ import org.springframework.stereotype.Service;
 import pro.sky.petshelterbot.model.Person;
 import pro.sky.petshelterbot.repository.PersonRepository;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class PersonService {
 
-    private final PersonRepository personRepository;
+  private final PersonRepository personRepository;
 
-    @Autowired
-    public PersonService(PersonRepository personRepository) {
-        this.personRepository = personRepository;
-    }
+  @Autowired
+  public PersonService(PersonRepository personRepository) {
+    this.personRepository = personRepository;
+  }
 
-    public List<Person> getAll() {
-        return personRepository.findAll();
-    }
+  public List<Person> getAll() {
+    return personRepository.findAll();
+  }
 
-    public List<Person> getAllVolunteer() {
-        return personRepository.getPersonByIsVolunteerIsTrue();
-    }
+  public List<Person> getAllVolunteer() {
+    return personRepository.getPeopleByIsVolunteerIsTrue();
+  }
 
-    public boolean setPersonIsVolunteerIsTrue(Long id) {
-        Person person = personRepository.findPersonById(id);
-        if (person == null) {
-            return false;
-        }
-        person.setIsVolunteer(true);
-        personRepository.save(person);
-        return true;
-    }
+  public Optional<Person> getPersonById(Long id) {
+    Person person = personRepository.findPersonById(id);
+    return Optional.ofNullable(person);
+  }
 
-    public boolean setPersonIsVolunteerIsFalse(Long id) {
-        Person person = personRepository.findPersonById(id);
-        if (person == null) {
-            return false;
-        }
-        person.setIsVolunteer(false);
-        personRepository.save(person);
-        return true;
-    }
+  public void setPersonIsVolunteerIsTrue(Person person) {
+    person.setIsVolunteer(true);
+    personRepository.save(person);
+  }
+
+  public void setPersonIsVolunteerIsFalse(Person person) {
+    person.setIsVolunteer(false);
+    personRepository.save(person);
+  }
 
   public List<Person> getVolunteers() {
     return personRepository.getPeopleByIsVolunteerIsTrue();
@@ -59,4 +51,5 @@ public class PersonService {
   public void save(Person person) {
     personRepository.save(person);
   }
+
 }

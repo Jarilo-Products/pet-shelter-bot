@@ -76,8 +76,7 @@ public class TextMessageProcessor {
     LastCommand lastCommand = optionalLastCommand.get();
     if (!lastCommand.getIsClosed()) { // Обработка последних команд пользователя со статусом is_closed = false
       // Обработка сообщений пользователя, направленных волонтеру
-      if (lastCommand.getLastCommand().startsWith("/volunteer")
-          && !lastCommand.getIsClosed()) {
+      if (lastCommand.getLastCommand().startsWith("/volunteer")) {
         processUserAsking(lastCommand, text);
         return;
       }
@@ -95,7 +94,7 @@ public class TextMessageProcessor {
     }
     lastCommandService.save(lastCommand);
   }
-        
+
   void sendMessage(long chatId, String message) {
     SendMessage sendMessage = new SendMessage(chatId, message);
     SendResponse sendResponse = telegramBot.execute(sendMessage);
@@ -167,10 +166,10 @@ public class TextMessageProcessor {
    * в {@link pro.sky.petshelterbot.utility.TextUtils#ANSWERS ANSWERS}, то она будет записана в <code>lastCommand</code>
    * (<code>isClosed == true</code>)
    *
-   * @param command команда, вызванная пользователем <i>(e.g. "/info")</i>.
-   *                Если в {@link pro.sky.petshelterbot.utility.TextUtils#ANSWERS ANSWERS} не найдется
-   *                подходящего ответа, то пользователю будет отправлено сообщение
-   *                {@link TextMessageProcessor#UNKNOWN_COMMAND}
+   * @param command     команда, вызванная пользователем <i>(e.g. "/info")</i>.
+   *                    Если в {@link pro.sky.petshelterbot.utility.TextUtils#ANSWERS ANSWERS} не найдется
+   *                    подходящего ответа, то пользователю будет отправлено сообщение
+   *                    {@link TextMessageProcessor#UNKNOWN_COMMAND}
    * @param lastCommand сущность, содержащая информацию о последней команде пользователя
    *                    и о последнем выбранном приюте. Также содержит флаг <code>isClosed</code>,
    *                    сигнализирующий о том, что пользователь может использовать другие команды.
@@ -281,10 +280,10 @@ public class TextMessageProcessor {
    *                    выбранном приюте.
    */
   void processSendContactsCommand(LastCommand lastCommand) {
-      String message = ANSWERS.get("/sendcontacts");
-      sendMessage(lastCommand.getChatId(), message);
-      lastCommand.setLastCommand("/sendcontacts");
-      lastCommand.setIsClosed(false);
+    String message = ANSWERS.get("/sendcontacts");
+    sendMessage(lastCommand.getChatId(), message);
+    lastCommand.setLastCommand("/sendcontacts");
+    lastCommand.setIsClosed(false);
   }
 
   /**
@@ -298,7 +297,7 @@ public class TextMessageProcessor {
     String[] lines = text.split("\n");
     if (lines.length < 5) {
       sendMessage(lastCommand.getChatId(), "Количество строк должно соответствовать примеру. " +
-              "Попробуйте ещё раз!");
+          "Попробуйте ещё раз!");
     }
 
     String fullName = lines[0];
@@ -323,19 +322,19 @@ public class TextMessageProcessor {
 
     if (!isValid) {
       sendMessage(lastCommand.getChatId(),
-              "Пожалуйста, посмотрите пример корректного ввода и попробуйте ещё раз.");
+          "Пожалуйста, посмотрите пример корректного ввода и попробуйте ещё раз.");
     } else {
       String[] nameParts = fullName.split(" ");
-      String firstName = nameParts[0];
-      String lastName = nameParts[1];
+      String firstName = nameParts[1];
+      String lastName = nameParts[0];
       String middleName = nameParts[2];
 
       Person person = new Person(lastCommand.getChatId(), firstName, lastName, middleName, parseDate(birthdate),
-              phone, email, address);
+          phone, email, address);
       personService.save(person);
 
       lastCommand.setIsClosed(true);
-      sendMessage(lastCommand.getChatId(), ANSWERS.get("acceptedcontacts"));
+      sendMessage(lastCommand.getChatId(), ANSWERS.get("/acceptedcontacts"));
     }
   }
 
