@@ -9,8 +9,10 @@ import java.util.List;
 
 public interface PersonRepository extends JpaRepository<Person, Long> {
 
-    List<Person> getPersonByIsVolunteerIsTrue();
+  Person findPersonById(Long id);
+  
+  Person getPersonByChatIdAndIsVolunteerIsTrue(Long chatId);
 
-    Person findPersonById(Long id);
+  List<Person> getPeopleByIsVolunteerIsTrue();
 
 }

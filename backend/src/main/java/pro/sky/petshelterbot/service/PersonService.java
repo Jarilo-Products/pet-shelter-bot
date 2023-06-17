@@ -48,4 +48,12 @@ public class PersonService {
         return true;
     }
 
+  public List<Person> getVolunteers() {
+    return personRepository.getPeopleByIsVolunteerIsTrue();
+  }
+
+  public boolean isChatOfVolunteer(Long chatId) {
+    return personRepository.getPersonByChatIdAndIsVolunteerIsTrue(chatId) != null;
+  }
+
 }
