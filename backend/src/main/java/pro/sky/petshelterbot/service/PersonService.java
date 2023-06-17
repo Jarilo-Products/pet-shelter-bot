@@ -56,4 +56,7 @@ public class PersonService {
     return personRepository.getPersonByChatIdAndIsVolunteerIsTrue(chatId) != null;
   }
 
+  public void save(Person person) {
+    personRepository.save(person);
+  }
 }
