@@ -211,8 +211,8 @@ public class TextMessageProcessor {
       sendMessage(lastCommand.getChatId(), "Ошибка ввода даты рождения!");
       isValid = false;
     }
-    if (!address.matches("^[#.0-9а-яА-Я\\s,-]+$")) {
-      sendMessage(lastCommand.getChatId(), "Ошибка ввода адреса!");
+    if (!email.matches("^[A-Za-z0-9._]+@[A-Za-z0-9.]+\\.[A-Za-z]{2,6}$")) {
+      sendMessage(lastCommand.getChatId(), "Ошибка ввода email!");
       isValid = false;
     }
 
