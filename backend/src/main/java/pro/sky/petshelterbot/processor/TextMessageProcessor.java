@@ -202,26 +202,13 @@ public class TextMessageProcessor {
     String email = lines[3];
     String address = lines[4];
 
-    String[] nameParts = fullName.split(" ");
-    String firstName = nameParts[0];
-    String lastName = nameParts[1];
-    String middleName = nameParts[2];
-
     boolean isValid = true;
-    if (!fullName.matches("^[а-яА-Я ]+$")) {
+    if (!fullName.matches("^[а-яёА-ЯЁ-]+\s[а-яёА-ЯЁ-]+\s[а-яёА-ЯЁ-]+$")) {
       sendMessage(lastCommand.getChatId(), "Ошибка ввода ФИО!");
       isValid = false;
     }
     if (!birthdate.matches("^\\d{2}.\\d{2}.\\d{4}$")) {
       sendMessage(lastCommand.getChatId(), "Ошибка ввода даты рождения!");
-      isValid = false;
-    }
-    if (!phone.matches("8\\d{10}")) {
-      sendMessage(lastCommand.getChatId(), "Ошибка ввода номера телефона!");
-      isValid = false;
-    }
-    if (!email.matches("^[A-Za-z0-9._]+@[A-Za-z0-9.]+\\.[A-Za-z]{2,6}$")) {
-      sendMessage(lastCommand.getChatId(), "Ошибка ввода email!");
       isValid = false;
     }
     if (!address.matches("^[#.0-9а-яА-Я\\s,-]+$")) {
@@ -233,6 +220,11 @@ public class TextMessageProcessor {
       sendMessage(lastCommand.getChatId(),
               "Пожалуйста, посмотрите пример корректного ввода и попробуйте ещё раз.");
     } else {
+      String[] nameParts = fullName.split(" ");
+      String firstName = nameParts[0];
+      String lastName = nameParts[1];
+      String middleName = nameParts[2];
+
       Person person = new Person(lastCommand.getChatId(), firstName, lastName, middleName, parseDate(birthdate),
               phone, email, address);
       personService.save(person);
