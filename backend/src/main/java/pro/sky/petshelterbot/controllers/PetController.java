@@ -154,7 +154,10 @@ public class PetController {
       )
   })
   public ResponseEntity<Pet> editPet(@RequestBody @Validated Pet pet, @PathVariable Long id) {
-    if (petService.getPetById(id).isPresent() && (pet.getId() == null || Objects.equals(pet.getId(), id))) {
+    if (pet.getId() == null) {
+      pet.setId(id);
+    }
+    if (petService.getPetById(id).isPresent() && Objects.equals(pet.getId(), id)) {
       petService.save(pet);
       return ResponseEntity.ok().body(pet);
     } else {

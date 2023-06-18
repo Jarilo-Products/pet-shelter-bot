@@ -24,13 +24,6 @@ import static pro.sky.petshelterbot.utility.TextUtils.*;
 @Slf4j
 public class TextMessageProcessor {
 
-  /**
-   * Сообщение о том, что пользователь ввел необрабатываемую команду.
-   */
-  private final String UNKNOWN_COMMAND = """
-      К сожалению, бот не знает что ответить :(
-      Используйте команду /volunteer для вызова волонтера
-      """;
   private final Pattern VOLUNTEER_ANSWERING_TO_USER_PATTERN = Pattern.compile(
       "^ *[\\[][0-9]+[\\]].+$");
 
@@ -169,7 +162,7 @@ public class TextMessageProcessor {
    * @param command     команда, вызванная пользователем <i>(e.g. "/info")</i>.
    *                    Если в {@link pro.sky.petshelterbot.utility.TextUtils#ANSWERS ANSWERS} не найдется
    *                    подходящего ответа, то пользователю будет отправлено сообщение
-   *                    {@link TextMessageProcessor#UNKNOWN_COMMAND}
+   *                    {@link pro.sky.petshelterbot.utility.TextUtils#UNKNOWN_COMMAND UNKNOWN_COMMAND}
    * @param lastCommand сущность, содержащая информацию о последней команде пользователя
    *                    и о последнем выбранном приюте. Также содержит флаг <code>isClosed</code>,
    *                    сигнализирующий о том, что пользователь может использовать другие команды.
@@ -296,8 +289,8 @@ public class TextMessageProcessor {
   private void processContacts(LastCommand lastCommand, String text) {
     String[] lines = text.split("\n");
     if (lines.length < 5) {
-      sendMessage(lastCommand.getChatId(), "Количество строк должно соответствовать примеру. " +
-          "Попробуйте ещё раз!");
+      sendMessage(lastCommand.getChatId(), ANSWERS.get(COMMAND_SEND_CONTACTS + "_notenough"));
+      return;
     }
 
     String fullName = lines[0];
@@ -307,22 +300,23 @@ public class TextMessageProcessor {
     String address = lines[4];
 
     boolean isValid = true;
+    StringBuilder error = new StringBuilder();
     if (!fullName.matches("^[а-яёА-ЯЁ-]+\s[а-яёА-ЯЁ-]+\s[а-яёА-ЯЁ-]+$")) {
-      sendMessage(lastCommand.getChatId(), "Ошибка ввода ФИО!");
+      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS + "_invalid_name")).append('\n');
       isValid = false;
     }
-    if (!birthdate.matches("^\\d{2}.\\d{2}.\\d{4}$")) {
-      sendMessage(lastCommand.getChatId(), "Ошибка ввода даты рождения!");
+    if (!birthdate.matches("^\\d{2}[.]\\d{2}[.]\\d{4}$")) {
+      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS + "_invalid_bithdate")).append('\n');
       isValid = false;
     }
-    if (!email.matches("^[A-Za-z0-9._]+@[A-Za-z0-9.]+\\.[A-Za-z]{2,6}$")) {
-      sendMessage(lastCommand.getChatId(), "Ошибка ввода email!");
+    if (!email.matches("^[\\w.]+@[\\w.]+\\.[A-Za-z]{2,6}$")) {
+      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS + "_invalid_email")).append('\n');
       isValid = false;
     }
 
     if (!isValid) {
-      sendMessage(lastCommand.getChatId(),
-          "Пожалуйста, посмотрите пример корректного ввода и попробуйте ещё раз.");
+      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS + "_invalid"));
+      sendMessage(lastCommand.getChatId(), error.toString());
     } else {
       String[] nameParts = fullName.split(" ");
       String firstName = nameParts[1];

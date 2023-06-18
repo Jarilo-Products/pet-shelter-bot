@@ -86,7 +86,7 @@ public class PersonController {
           description = "удалось присвоить статус"
       ),
       @ApiResponse(
-          responseCode = "204",
+          responseCode = "404",
           description = "личности с данным id не существует в базе"
       ),
       @ApiResponse(
@@ -130,6 +130,13 @@ public class PersonController {
     } else {
       return ResponseEntity.notFound().build();
     }
+  }
+
+  @PostMapping
+  @Operation(summary = "Добавление пользователя (ДЛЯ ТЕСТОВ)")
+  public Person addPerson(@RequestBody Person person) {
+    personService.save(person);
+    return person;
   }
 
 }

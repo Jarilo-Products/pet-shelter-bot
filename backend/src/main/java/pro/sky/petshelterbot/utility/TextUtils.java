@@ -5,6 +5,14 @@ import java.util.Map;
 
 public class TextUtils {
 
+  /**
+   * Сообщение о том, что пользователь ввел необрабатываемую команду.
+   */
+  public static final String UNKNOWN_COMMAND = """
+      К сожалению, бот не знает что ответить :(
+      Используйте команду /volunteer для вызова волонтера
+      """;
+
   public static final String COMMAND_START = "/start";
   public static final String COMMAND_INFO = "/info";
   public static final String COMMAND_HOW_TO_PET = "/howtopet";
@@ -213,6 +221,11 @@ public class TextUtils {
         email@mail.ru
         г.Астана, ул. Коллективная, д.200, кв.354
         """);
+    put(COMMAND_SEND_CONTACTS + "_notenough", "Количество строк должно соответствовать примеру. Попробуйте ещё раз!");
+    put(COMMAND_SEND_CONTACTS + "_invalid_name", "Ошибка ввода ФИО!");
+    put(COMMAND_SEND_CONTACTS + "_invalid_bithdate", "Ошибка ввода даты рождения!");
+    put(COMMAND_SEND_CONTACTS + "_invalid_email", "Ошибка ввода email!");
+    put(COMMAND_SEND_CONTACTS + "_invalid", "Пожалуйста, посмотрите пример корректного ввода и попробуйте ещё раз.");
     put("acceptedcontacts", """
         Контактные данные успешно сохранены!
                       

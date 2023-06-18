@@ -11,8 +11,10 @@ import pro.sky.petshelterbot.repository.PersonRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +47,49 @@ class PersonServiceTest {
   }
 
   @Test
+  public void getAllVolunteerTest() {
+    when(personRepository.getPeopleByIsVolunteerIsTrue()).thenReturn(persons);
+
+    assertEquals(personService.getAllVolunteer(), persons);
+  }
+
+  @Test
+  public void getPersonByIdTest() {
+    Person person = new Person();
+    person.setId(1L);
+
+    when(personRepository.findPersonById(1L)).thenReturn(person);
+    when(personRepository.findPersonById(2L)).thenReturn(null);
+
+    Optional<Person> presentPerson = personService.getPersonById(1L);
+    Optional<Person> emptyPerson = personService.getPersonById(2L);
+
+    assertTrue(presentPerson.isPresent());
+    assertEquals(presentPerson.get(), person);
+    assertTrue(emptyPerson.isEmpty());
+  }
+
+  @Test
+  public void setPersonIsVolunteerIsTrueTest() {
+    Person person = new Person();
+
+    personService.setPersonIsVolunteerIsTrue(person);
+
+    assertTrue(person.getIsVolunteer());
+    verify(personRepository).save(person);
+  }
+
+  @Test
+  public void setPersonIsVolunteerIsFalseTest() {
+    Person person = new Person();
+
+    personService.setPersonIsVolunteerIsFalse(person);
+
+    assertFalse(person.getIsVolunteer());
+    verify(personRepository).save(person);
+  }
+
+  @Test
   public void getVolunteersTest() {
     when(personRepository.getPeopleByIsVolunteerIsTrue()).thenReturn(persons);
 
@@ -59,6 +104,15 @@ class PersonServiceTest {
 
     assertTrue(personService.isChatOfVolunteer(1L));
     assertFalse(personService.isChatOfVolunteer(2L));
+  }
+
+  @Test
+  public void saveTest() {
+    Person person = new Person();
+
+    personService.save(person);
+
+    verify(personRepository).save(person);
   }
 
 }
