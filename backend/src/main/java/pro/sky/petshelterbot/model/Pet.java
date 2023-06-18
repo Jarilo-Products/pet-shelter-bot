@@ -33,29 +33,28 @@ public class Pet {
   @Schema(accessMode = Schema.AccessMode.READ_ONLY)
   private Long id;
 
-  @NotNull
+  @NotNull(message = "Тип животного должен быть указан")
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private Type type;
 
-  @NotBlank
+  @NotBlank(message = "Имя животного не может быть пустым")
   @Column(nullable = false)
   private String name;
 
-  @NotNull
+  @NotNull(message = "Дата рождения животного должна быть указана")
   private LocalDate birthdate;
 
-  @NotNull
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private Status status;
 
-  @NotNull
+  @NotNull(message = "Состояние здоровья животного должно быть указано")
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private HealthStatus healthStatus;
 
-  @NotNull
+  @NotNull(message = "Пол животного должен быть указан")
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private Sex sex;

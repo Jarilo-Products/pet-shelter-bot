@@ -58,8 +58,8 @@ class PersonServiceTest {
     Person person = new Person();
     person.setId(1L);
 
-    when(personRepository.findPersonById(1L)).thenReturn(person);
-    when(personRepository.findPersonById(2L)).thenReturn(null);
+    when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
+    when(personRepository.findPersonById(2L)).thenReturn(Optional.empty());
 
     Optional<Person> presentPerson = personService.getPersonById(1L);
     Optional<Person> emptyPerson = personService.getPersonById(2L);

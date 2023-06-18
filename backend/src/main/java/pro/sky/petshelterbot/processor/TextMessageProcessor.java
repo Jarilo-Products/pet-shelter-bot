@@ -4,7 +4,6 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pro.sky.petshelterbot.model.LastCommand;
 import pro.sky.petshelterbot.model.Person;
@@ -25,13 +24,12 @@ import static pro.sky.petshelterbot.utility.TextUtils.*;
 public class TextMessageProcessor {
 
   private final Pattern VOLUNTEER_ANSWERING_TO_USER_PATTERN = Pattern.compile(
-      "^ *[\\[][0-9]+[\\]].+$");
+      "^ *[\\[]\\d+[\\]].+$");
 
   private final TelegramBot telegramBot;
   private final LastCommandService lastCommandService;
   private final PersonService personService;
 
-  @Autowired
   public TextMessageProcessor(TelegramBot telegramBot,
                               LastCommandService lastCommandService,
                               PersonService personService) {

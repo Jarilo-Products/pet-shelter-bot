@@ -1,6 +1,5 @@
 package pro.sky.petshelterbot.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pro.sky.petshelterbot.model.Person;
 import pro.sky.petshelterbot.repository.PersonRepository;
@@ -12,7 +11,6 @@ public class PersonService {
 
   private final PersonRepository personRepository;
 
-  @Autowired
   public PersonService(PersonRepository personRepository) {
     this.personRepository = personRepository;
   }
@@ -26,8 +24,7 @@ public class PersonService {
   }
 
   public Optional<Person> getPersonById(Long id) {
-    Person person = personRepository.findPersonById(id);
-    return Optional.ofNullable(person);
+    return personRepository.findPersonById(id);
   }
 
   public void setPersonIsVolunteerIsTrue(Person person) {
