@@ -8,6 +8,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pro.sky.petshelterbot.model.LastCommand;
 import pro.sky.petshelterbot.repository.LastCommandRepository;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,8 +27,8 @@ class LastCommandServiceTest {
   @Test
   public void getByChatIdTest() {
     LastCommand lastCommand = new LastCommand();
-    when(lastCommandRepository.findByChatId(1L)).thenReturn(lastCommand);
-    when(lastCommandRepository.findByChatId(2L)).thenReturn(null);
+    when(lastCommandRepository.findByChatId(1L)).thenReturn(Optional.of(lastCommand));
+    when(lastCommandRepository.findByChatId(2L)).thenReturn(Optional.empty());
 
     assertTrue(lastCommandService.getByChatId(1L).isPresent());
     assertTrue(lastCommandService.getByChatId(2L).isEmpty());

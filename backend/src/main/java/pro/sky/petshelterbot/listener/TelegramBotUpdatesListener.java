@@ -5,7 +5,6 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pro.sky.petshelterbot.processor.TextMessageProcessor;
 
@@ -19,7 +18,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
   private final TelegramBot telegramBot;
   private final TextMessageProcessor textMessageProcessor;
 
-  @Autowired
   public TelegramBotUpdatesListener(TelegramBot telegramBot,
                                     TextMessageProcessor textMessageProcessor) {
     this.telegramBot = telegramBot;

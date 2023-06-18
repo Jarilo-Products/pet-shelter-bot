@@ -11,6 +11,7 @@ import pro.sky.petshelterbot.repository.PetRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -40,8 +41,8 @@ class PetServiceTest {
   @Test
   void getPetByIdTest() {
     Pet pet = new Pet();
-    when(petRepository.findPetById(1L)).thenReturn(pet);
-    when(petRepository.findPetById(2L)).thenReturn(null);
+    when(petRepository.findPetById(1L)).thenReturn(Optional.of(pet));
+    when(petRepository.findPetById(2L)).thenReturn(Optional.empty());
 
     assertTrue(petService.getPetById(1L).isPresent());
     assertFalse(petService.getPetById(2L).isPresent());

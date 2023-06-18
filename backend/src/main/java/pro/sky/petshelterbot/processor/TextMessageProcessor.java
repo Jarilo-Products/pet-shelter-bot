@@ -4,7 +4,6 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pro.sky.petshelterbot.model.LastCommand;
 import pro.sky.petshelterbot.model.Person;
@@ -18,27 +17,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import static pro.sky.petshelterbot.utility.TextUtils.ANSWERS;
+import static pro.sky.petshelterbot.utility.TextUtils.*;
 
 @Component
 @Slf4j
 public class TextMessageProcessor {
 
-  /**
-   * Сообщение о том, что пользователь ввел необрабатываемую команду.
-   */
-  private final String UNKNOWN_COMMAND = """
-      К сожалению, бот не знает что ответить :(
-      Используйте команду /volunteer для вызова волонтера
-      """;
   private final Pattern VOLUNTEER_ANSWERING_TO_USER_PATTERN = Pattern.compile(
-      "^ *[\\[][0-9]+[\\]].+$");
+      "^ *[\\[]\\d+[\\]].+$");
 
   private final TelegramBot telegramBot;
   private final LastCommandService lastCommandService;
   private final PersonService personService;
 
-  @Autowired
   public TextMessageProcessor(TelegramBot telegramBot,
                               LastCommandService lastCommandService,
                               PersonService personService) {
@@ -76,26 +67,26 @@ public class TextMessageProcessor {
     LastCommand lastCommand = optionalLastCommand.get();
     if (!lastCommand.getIsClosed()) { // Обработка последних команд пользователя со статусом is_closed = false
       // Обработка сообщений пользователя, направленных волонтеру
-      if (lastCommand.getLastCommand().startsWith("/volunteer")) {
+      if (lastCommand.getLastCommand().startsWith(COMMAND_VOLUNTEER)) {
         processUserAsking(lastCommand, text);
         return;
       }
       switch (lastCommand.getLastCommand()) {
-        case "/start" -> processChoosingShelter(lastCommand, text);
-        case "/sendcontacts" -> processContacts(lastCommand, text);
+        case COMMAND_START -> processChoosingShelter(lastCommand, text);
+        case COMMAND_SEND_CONTACTS -> processContacts(lastCommand, text);
       }
     } else { // Обработка последних команд пользователя со статусом is_closed = true
       switch (text) {
-        case "/start" -> processStartCommand(lastCommand);
-        case "/sendcontacts" -> processSendContactsCommand(lastCommand);
-        case "/volunteer" -> processVolunteerCommand(lastCommand);
+        case COMMAND_START -> processStartCommand(lastCommand);
+        case COMMAND_SEND_CONTACTS -> processSendContactsCommand(lastCommand);
+        case COMMAND_VOLUNTEER -> processVolunteerCommand(lastCommand);
         default -> processSingleAnswerCommand(text, lastCommand);
       }
     }
     lastCommandService.save(lastCommand);
   }
 
-  void sendMessage(long chatId, String message) {
+  private void sendMessage(long chatId, String message) {
     SendMessage sendMessage = new SendMessage(chatId, message);
     SendResponse sendResponse = telegramBot.execute(sendMessage);
     if (!sendResponse.isOk()) {
@@ -108,12 +99,12 @@ public class TextMessageProcessor {
    *
    * @param chatId id чата
    */
-  void processFirstStartCommand(long chatId) {
-    String message = ANSWERS.get("/start");
+  private void processFirstStartCommand(long chatId) {
+    String message = ANSWERS.get(COMMAND_START);
     sendMessage(chatId, message);
     LastCommand lastCommand = new LastCommand();
     lastCommand.setChatId(chatId);
-    lastCommand.setLastCommand("/start");
+    lastCommand.setLastCommand(COMMAND_START);
     lastCommand.setIsClosed(false);
     lastCommandService.save(lastCommand);
   }
@@ -127,10 +118,10 @@ public class TextMessageProcessor {
    *                    Если <code>isClosed == false</code>, то пользователь должен завершить
    *                    использование последней команды.
    */
-  void processStartCommand(LastCommand lastCommand) {
-    String message = ANSWERS.get("/start_registered");
+  private void processStartCommand(LastCommand lastCommand) {
+    String message = ANSWERS.get(COMMAND_START + "_registered");
     sendMessage(lastCommand.getChatId(), message);
-    lastCommand.setLastCommand("/start");
+    lastCommand.setLastCommand(COMMAND_START);
     lastCommand.setIsClosed(false);
   }
 
@@ -145,15 +136,15 @@ public class TextMessageProcessor {
    * @param text        "1" – приют для кошек, "2" – приют для собак. При любом другом значении предлагается
    *                    повторно выбрать приют (вызывается метод {@link TextMessageProcessor#processStartCommand})
    */
-  void processChoosingShelter(LastCommand lastCommand, String text) {
+  private void processChoosingShelter(LastCommand lastCommand, String text) {
     switch (text.trim()) {
       case "1" -> {
-        sendMessage(lastCommand.getChatId(), ANSWERS.get("/chosen_CAT"));
+        sendMessage(lastCommand.getChatId(), ANSWERS.get("chosen_CAT"));
         lastCommand.setIsClosed(true);
         lastCommand.setActiveType(Type.CAT);
       }
       case "2" -> {
-        sendMessage(lastCommand.getChatId(), ANSWERS.get("/chosen_DOG"));
+        sendMessage(lastCommand.getChatId(), ANSWERS.get("chosen_DOG"));
         lastCommand.setIsClosed(true);
         lastCommand.setActiveType(Type.DOG);
       }
@@ -169,14 +160,14 @@ public class TextMessageProcessor {
    * @param command     команда, вызванная пользователем <i>(e.g. "/info")</i>.
    *                    Если в {@link pro.sky.petshelterbot.utility.TextUtils#ANSWERS ANSWERS} не найдется
    *                    подходящего ответа, то пользователю будет отправлено сообщение
-   *                    {@link TextMessageProcessor#UNKNOWN_COMMAND}
+   *                    {@link pro.sky.petshelterbot.utility.TextUtils#UNKNOWN_COMMAND UNKNOWN_COMMAND}
    * @param lastCommand сущность, содержащая информацию о последней команде пользователя
    *                    и о последнем выбранном приюте. Также содержит флаг <code>isClosed</code>,
    *                    сигнализирующий о том, что пользователь может использовать другие команды.
    *                    Если <code>isClosed == false</code>, то пользователь должен завершить
    *                    использование последней команды.
    */
-  void processSingleAnswerCommand(String command, LastCommand lastCommand) {
+  private void processSingleAnswerCommand(String command, LastCommand lastCommand) {
     String message = ANSWERS.get(command + "_" + lastCommand.getActiveType().name());
     if (message == null) {
       sendMessage(lastCommand.getChatId(), UNKNOWN_COMMAND);
@@ -199,22 +190,22 @@ public class TextMessageProcessor {
    *                    Если <code>isClosed == false</code>, то пользователь должен завершить
    *                    использование последней команды.
    */
-  void processVolunteerCommand(LastCommand lastCommand) {
+  private void processVolunteerCommand(LastCommand lastCommand) {
     List<Person> volunteers = personService.getVolunteers();
     if (volunteers.isEmpty()) {
-      sendMessage(lastCommand.getChatId(), ANSWERS.get("/volunteer_empty"));
+      sendMessage(lastCommand.getChatId(), ANSWERS.get(COMMAND_VOLUNTEER + "_empty"));
       lastCommand.setIsClosed(true);
-      lastCommand.setLastCommand("/volunteer");
+      lastCommand.setLastCommand(COMMAND_VOLUNTEER);
       return;
     }
     int randomIndex = (int) (Math.random() * volunteers.size());
     Person randomVolunteer = volunteers.get(randomIndex);
     sendMessage(lastCommand.getChatId(),
-        ANSWERS.get("/volunteer").replace("[name]", randomVolunteer.getFirstName()));
-    lastCommand.setLastCommand("/volunteer " + randomVolunteer.getChatId());
+        ANSWERS.get(COMMAND_VOLUNTEER).replace("[name]", randomVolunteer.getFirstName()));
+    lastCommand.setLastCommand(COMMAND_VOLUNTEER + " " + randomVolunteer.getChatId());
     lastCommand.setIsClosed(false);
     sendMessage(randomVolunteer.getChatId(),
-        ANSWERS.get("/volunteer_memo").replace("user_chat_id",
+        ANSWERS.get(COMMAND_VOLUNTEER + "_memo").replace("user_chat_id",
             lastCommand.getChatId().toString()));
   }
 
@@ -228,27 +219,27 @@ public class TextMessageProcessor {
    *                        формате "[user_chat_id] Текст ответного сообщения"
    * @param volunteerChatId id чата волонтера
    */
-  void processVolunteerAnswering(String text, Long volunteerChatId) {
+  private void processVolunteerAnswering(String text, Long volunteerChatId) {
     text = text.trim();
     String[] arr = text.split("[\\[|\\]]");
     Long userChatId = Long.parseLong(arr[1]);
     Optional<LastCommand> userLastCommandOptional = lastCommandService.getByChatId(userChatId);
     if (userLastCommandOptional.isEmpty()) {
-      sendMessage(volunteerChatId, ANSWERS.get("/volunteer_no_chat"));
+      sendMessage(volunteerChatId, ANSWERS.get(COMMAND_VOLUNTEER + "_no_chat"));
       return;
     }
     LastCommand userLastCommand = userLastCommandOptional.get();
-    if (!userLastCommand.getLastCommand().startsWith("/volunteer")
+    if (!userLastCommand.getLastCommand().startsWith(COMMAND_VOLUNTEER)
         || userLastCommand.getIsClosed()) {
-      sendMessage(volunteerChatId, ANSWERS.get("/volunteer_chat_not_opened"));
+      sendMessage(volunteerChatId, ANSWERS.get(COMMAND_VOLUNTEER + "_chat_not_opened"));
       return;
     }
     String answer = text.substring(text.indexOf(']') + 1).trim();
     if (answer.equalsIgnoreCase("end")) {
       sendMessage(volunteerChatId,
-          ANSWERS.get("/volunteer_end").replace("user_chat_id", userChatId.toString()));
-      sendMessage(userChatId, ANSWERS.get("/volunteer_end_user"));
-      userLastCommand.setLastCommand("/volunteer");
+          ANSWERS.get(COMMAND_VOLUNTEER + "_end").replace("user_chat_id", userChatId.toString()));
+      sendMessage(userChatId, ANSWERS.get(COMMAND_VOLUNTEER + "_end_user"));
+      userLastCommand.setLastCommand(COMMAND_VOLUNTEER);
       userLastCommand.setIsClosed(true);
       lastCommandService.save(userLastCommand);
     } else if (!answer.isBlank()) {
@@ -267,7 +258,7 @@ public class TextMessageProcessor {
    * @param text        текст сообщения, который пересылается волонтеру в формате
    *                    "[user_chat_id] Текст сообщения пользователя"
    */
-  void processUserAsking(LastCommand lastCommand, String text) {
+  private void processUserAsking(LastCommand lastCommand, String text) {
     Long volunteerChatId = Long.parseLong(lastCommand.getLastCommand().split(" ")[1]);
     sendMessage(volunteerChatId,
         '[' + lastCommand.getChatId().toString() + "] " + text);
@@ -279,10 +270,10 @@ public class TextMessageProcessor {
    * @param lastCommand сущность, содержащая информацию о последней команде пользователя и последнем
    *                    выбранном приюте.
    */
-  void processSendContactsCommand(LastCommand lastCommand) {
-    String message = ANSWERS.get("/sendcontacts");
+  private void processSendContactsCommand(LastCommand lastCommand) {
+    String message = ANSWERS.get(COMMAND_SEND_CONTACTS);
     sendMessage(lastCommand.getChatId(), message);
-    lastCommand.setLastCommand("/sendcontacts");
+    lastCommand.setLastCommand(COMMAND_SEND_CONTACTS);
     lastCommand.setIsClosed(false);
   }
 
@@ -293,11 +284,11 @@ public class TextMessageProcessor {
    * @param text        информация от пользователя. При несоблюдении правил ввода информацию, будет отправлено сообщение
    *                    с просьбой ознакомиться с примером и попробовать еще раз.
    */
-  void processContacts(LastCommand lastCommand, String text) {
+  private void processContacts(LastCommand lastCommand, String text) {
     String[] lines = text.split("\n");
     if (lines.length < 5) {
-      sendMessage(lastCommand.getChatId(), "Количество строк должно соответствовать примеру. " +
-          "Попробуйте ещё раз!");
+      sendMessage(lastCommand.getChatId(), ANSWERS.get(COMMAND_SEND_CONTACTS + "_notenough"));
+      return;
     }
 
     String fullName = lines[0];
@@ -307,22 +298,23 @@ public class TextMessageProcessor {
     String address = lines[4];
 
     boolean isValid = true;
+    StringBuilder error = new StringBuilder();
     if (!fullName.matches("^[а-яёА-ЯЁ-]+\s[а-яёА-ЯЁ-]+\s[а-яёА-ЯЁ-]+$")) {
-      sendMessage(lastCommand.getChatId(), "Ошибка ввода ФИО!");
+      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS + "_invalid_name")).append('\n');
       isValid = false;
     }
-    if (!birthdate.matches("^\\d{2}.\\d{2}.\\d{4}$")) {
-      sendMessage(lastCommand.getChatId(), "Ошибка ввода даты рождения!");
+    if (!birthdate.matches("^\\d{2}[.]\\d{2}[.]\\d{4}$")) {
+      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS + "_invalid_bithdate")).append('\n');
       isValid = false;
     }
-    if (!email.matches("^[A-Za-z0-9._]+@[A-Za-z0-9.]+\\.[A-Za-z]{2,6}$")) {
-      sendMessage(lastCommand.getChatId(), "Ошибка ввода email!");
+    if (!email.matches("^[\\w.]+@[\\w.]+\\.[A-Za-z]{2,6}$")) {
+      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS + "_invalid_email")).append('\n');
       isValid = false;
     }
 
     if (!isValid) {
-      sendMessage(lastCommand.getChatId(),
-          "Пожалуйста, посмотрите пример корректного ввода и попробуйте ещё раз.");
+      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS + "_invalid"));
+      sendMessage(lastCommand.getChatId(), error.toString());
     } else {
       String[] nameParts = fullName.split(" ");
       String firstName = nameParts[1];
@@ -334,7 +326,7 @@ public class TextMessageProcessor {
       personService.save(person);
 
       lastCommand.setIsClosed(true);
-      sendMessage(lastCommand.getChatId(), ANSWERS.get("/acceptedcontacts"));
+      sendMessage(lastCommand.getChatId(), ANSWERS.get("acceptedcontacts"));
     }
   }
 
@@ -344,7 +336,7 @@ public class TextMessageProcessor {
    * @param dateString строка с датой в формате dd.MM.yyyy
    * @return объект LocalDate
    */
-  LocalDate parseDate(String dateString) {
+  private LocalDate parseDate(String dateString) {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     return LocalDate.parse(dateString, formatter);
   }

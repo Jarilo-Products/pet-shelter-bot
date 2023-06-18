@@ -21,7 +21,7 @@ public class PersonController {
     this.personService = personService;
   }
 
-  @GetMapping()
+  @GetMapping
   @Operation(
       summary = "Получаем всех людей.",
       description = "Можно получить все личности, соответсвующие обекту Person")
@@ -39,7 +39,7 @@ public class PersonController {
           description = "произошла ошибка, не зависящая от вызывающей стороны"
       )
   })
-  public ResponseEntity<Object> getAllPerson() {
+  public ResponseEntity<?> getAllPerson() {
     List<Person> personList = personService.getAll();
     if (!personList.isEmpty()) {
       return ResponseEntity.ok(personList);
@@ -66,7 +66,7 @@ public class PersonController {
           description = "произошла ошибка, не зависящая от вызывающей стороны"
       )
   })
-  public ResponseEntity<Object> getAllVolunteer() {
+  public ResponseEntity<?> getAllVolunteer() {
     List<Person> allVolunteer = personService.getAllVolunteer();
     if (!allVolunteer.isEmpty()) {
       return ResponseEntity.ok(allVolunteer);
@@ -86,7 +86,7 @@ public class PersonController {
           description = "удалось присвоить статус"
       ),
       @ApiResponse(
-          responseCode = "204",
+          responseCode = "404",
           description = "личности с данным id не существует в базе"
       ),
       @ApiResponse(
@@ -94,14 +94,10 @@ public class PersonController {
           description = "произошла ошибка, не зависящая от вызывающей стороны"
       )
   })
-  public ResponseEntity<Object> changeIsVolunteerIsTrue(@PathVariable Long id) {
+  public ResponseEntity<?> changeIsVolunteerIsTrue(@PathVariable Long id) {
     Optional<Person> person = personService.getPersonById(id);
-    if (person.isPresent()) {
-      personService.setPersonIsVolunteerIsTrue(person.get());
-      return ResponseEntity.ok().build();
-    } else {
-      return ResponseEntity.notFound().build();
-    }
+    person.ifPresent(personService::setPersonIsVolunteerIsTrue);
+    return ResponseEntity.of(person);
   }
 
   @PatchMapping("/volunteers/{id}/revoke")
@@ -122,14 +118,17 @@ public class PersonController {
           description = "произошла ошибка, не зависящая от вызывающей стороны"
       )
   })
-  public ResponseEntity<Object> changeIsVolunteerIsFalse(@PathVariable Long id) {
+  public ResponseEntity<?> changeIsVolunteerIsFalse(@PathVariable Long id) {
     Optional<Person> person = personService.getPersonById(id);
-    if (person.isPresent()) {
-      personService.setPersonIsVolunteerIsFalse(person.get());
-      return ResponseEntity.ok().build();
-    } else {
-      return ResponseEntity.notFound().build();
-    }
+    person.ifPresent(personService::setPersonIsVolunteerIsFalse);
+    return ResponseEntity.of(person);
+  }
+
+  @PostMapping
+  @Operation(summary = "Добавление пользователя (ДЛЯ ТЕСТОВ)")
+  public Person addPerson(@RequestBody Person person) {
+    personService.save(person);
+    return person;
   }
 
 }

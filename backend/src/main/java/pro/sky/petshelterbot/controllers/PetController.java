@@ -11,9 +11,8 @@ import pro.sky.petshelterbot.model.Pet;
 import pro.sky.petshelterbot.model.enums.Status;
 import pro.sky.petshelterbot.service.PetService;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import javax.validation.Valid;
+import java.util.*;
 
 @RestController
 @RequestMapping("/pets")
@@ -26,7 +25,7 @@ public class PetController {
     this.petService = petService;
   }
 
-  @GetMapping()
+  @GetMapping
   @Operation(
       summary = "Позволяет увидеть всех питомцев.",
       description = "Можно увидеть всех питомцев, соответсвующих схемой обекта Pet"
@@ -45,7 +44,7 @@ public class PetController {
           description = "произошла ошибка, не зависящая от вызывающей стороны"
       )
   })
-  public ResponseEntity<Object> getAllPets() {
+  public ResponseEntity<?> getAllPets() {
     List<Pet> pets = petService.getAll();
     if (!pets.isEmpty()) {
       return ResponseEntity.ok(pets);
@@ -73,13 +72,8 @@ public class PetController {
           description = "произошла ошибка, не зависящая от вызывающей стороны"
       )
   })
-  public ResponseEntity<Pet> getPet(@PathVariable Long id) {
-    Optional<Pet> pet = petService.getPetById(id);
-    if (pet.isPresent()) {
-      return ResponseEntity.ok(pet.get());
-    } else {
-      return ResponseEntity.notFound().build();
-    }
+  public ResponseEntity<?> getPet(@PathVariable Long id) {
+    return ResponseEntity.of(petService.getPetById(id));
   }
 
   @PostMapping
@@ -113,11 +107,10 @@ public class PetController {
           description = "произошла ошибка, не зависящая от вызывающей стороны"
       )
   })
-  public ResponseEntity<Pet> addPet(@RequestBody @Validated Pet pet) {
+  public ResponseEntity<?> addPet(@RequestBody @Validated Pet pet) {
     pet.setStatus(Status.OWNERLESS);
     petService.save(pet);
     return ResponseEntity.ok().body(pet);
-
   }
 
   @PutMapping("/{id}")
@@ -153,8 +146,11 @@ public class PetController {
           description = "произошла ошибка, не зависящая от вызывающей стороны"
       )
   })
-  public ResponseEntity<Pet> editPet(@RequestBody @Validated Pet pet, @PathVariable Long id) {
-    if (petService.getPetById(id).isPresent() && (pet.getId() == null || Objects.equals(pet.getId(), id))) {
+  public ResponseEntity<?> editPet(@RequestBody @Valid Pet pet, @PathVariable Long id) {
+    if (pet.getId() == null) {
+      pet.setId(id);
+    }
+    if (petService.getPetById(id).isPresent() && Objects.equals(pet.getId(), id)) {
       petService.save(pet);
       return ResponseEntity.ok().body(pet);
     } else {
@@ -181,13 +177,11 @@ public class PetController {
           description = "произошла ошибка, не зависящая от вызывающей стороны"
       )
   })
-  public ResponseEntity<Object> deletePet(@PathVariable Long id) {
+  public ResponseEntity<?> deletePet(@PathVariable Long id) {
     Optional<Pet> pet = petService.getPetById(id);
     if (pet.isPresent()) {
       petService.delete(id);
-      return ResponseEntity.ok().body(pet.get());
-    } else {
-      return ResponseEntity.notFound().build();
     }
+    return ResponseEntity.of(pet);
   }
 }
