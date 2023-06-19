@@ -37,9 +37,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
           .forEach(update -> {
             log.info("Processing update: {}", update);
             Message message = update.message();
-            long chatId = message.chat().id();
-            String text = message.text();
-            textMessageProcessor.processTextMessage(chatId, text);
+            textMessageProcessor.processTextMessage(message);
           });
     } catch (Exception e) {
       log.error(e.getMessage(), e);

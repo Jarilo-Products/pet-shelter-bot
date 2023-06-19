@@ -1,6 +1,7 @@
 package pro.sky.petshelterbot.processor;
 
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -26,25 +27,28 @@ public class TextMessageProcessor {
   private final Pattern VOLUNTEER_ANSWERING_TO_USER_PATTERN = Pattern.compile(
       "^ *[\\[]\\d+[\\]].+$");
 
-  private final TelegramBot telegramBot;
-  private final LastCommandService lastCommandService;
-  private final PersonService personService;
+  protected final TelegramBot telegramBot;
+  protected final LastCommandService lastCommandService;
+  protected final PersonService personService;
+
+  private final ReportProcessor reportProcessor;
 
   public TextMessageProcessor(TelegramBot telegramBot,
                               LastCommandService lastCommandService,
-                              PersonService personService) {
+                              PersonService personService,
+                              ReportProcessor reportProcessor) {
     this.telegramBot = telegramBot;
     this.lastCommandService = lastCommandService;
     this.personService = personService;
+    this.reportProcessor = reportProcessor;
   }
 
   /**
    * Обработка текстового сообщения от пользователя бота
-   *
-   * @param chatId id чата
-   * @param text   текст сообщения
    */
-  public void processTextMessage(long chatId, String text) {
+  public void processTextMessage(Message message) {
+    long chatId = message.chat().id();
+    String text = message.text();
     Optional<LastCommand> optionalLastCommand = lastCommandService.getByChatId(chatId);
     // Пользователь в первый раз зашел в бота и ввел какую-то хрень
     if (optionalLastCommand.isEmpty() && !text.equalsIgnoreCase("/start")) {
@@ -74,19 +78,21 @@ public class TextMessageProcessor {
       switch (lastCommand.getLastCommand()) {
         case COMMAND_START -> processChoosingShelter(lastCommand, text);
         case COMMAND_SEND_CONTACTS -> processContacts(lastCommand, text);
+        case COMMAND_SEND_REPORT -> reportProcessor.processorReport(message, lastCommand);
       }
     } else { // Обработка последних команд пользователя со статусом is_closed = true
       switch (text) {
         case COMMAND_START -> processStartCommand(lastCommand);
         case COMMAND_SEND_CONTACTS -> processSendContactsCommand(lastCommand);
         case COMMAND_VOLUNTEER -> processVolunteerCommand(lastCommand);
+        case COMMAND_SEND_REPORT -> processSendReportCommand(lastCommand);
         default -> processSingleAnswerCommand(text, lastCommand);
       }
     }
     lastCommandService.save(lastCommand);
   }
 
-  private void sendMessage(long chatId, String message) {
+  protected void sendMessage(long chatId, String message) {
     SendMessage sendMessage = new SendMessage(chatId, message);
     SendResponse sendResponse = telegramBot.execute(sendMessage);
     if (!sendResponse.isOk()) {
@@ -339,5 +345,18 @@ public class TextMessageProcessor {
   private LocalDate parseDate(String dateString) {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     return LocalDate.parse(dateString, formatter);
+  }
+
+  private void processSendReportCommand(LastCommand lastCommand) {
+    Optional<Person> optionalPerson = personService.getPersonByChatId(lastCommand.getChatId());
+    if (optionalPerson.isPresent() && optionalPerson.get().getPet() != null) {
+      String message = ANSWERS.get(COMMAND_SEND_REPORT);
+      sendMessage(lastCommand.getChatId(), message);
+      lastCommand.setLastCommand(COMMAND_SEND_REPORT);
+      lastCommand.setIsClosed(false);
+    } else {
+      String message = ANSWERS.get(COMMAND_NO_PET_REPORT);
+      sendMessage(lastCommand.getChatId(), message);
+    }
   }
 }

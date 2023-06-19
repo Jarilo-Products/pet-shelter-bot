@@ -75,9 +75,9 @@ public class PersonController {
     }
   }
 
-  @PatchMapping("/volunteers/{id}")
+  @PatchMapping("/volunteers/{chat_id}")
   @Operation(
-      summary = "Обновляет информацию о личности по ее id.",
+      summary = "Обновляет информацию о личности по ее chat_id.",
       description = "Для присвоения статуса - волонтер, необходимо выбрать true")
 
   @ApiResponses(value = {
@@ -94,13 +94,13 @@ public class PersonController {
           description = "произошла ошибка, не зависящая от вызывающей стороны"
       )
   })
-  public ResponseEntity<?> changeIsVolunteerIsTrue(@PathVariable Long id) {
-    Optional<Person> person = personService.getPersonById(id);
+  public ResponseEntity<?> changeIsVolunteerIsTrue(@PathVariable Long chat_id) {
+    Optional<Person> person = personService.getPersonByChatId(chat_id);
     person.ifPresent(personService::setPersonIsVolunteerIsTrue);
     return ResponseEntity.of(person);
   }
 
-  @PatchMapping("/volunteers/{id}/revoke")
+  @PatchMapping("/volunteers/{chat_id}/revoke")
   @Operation(
       summary = "Обновляет информацию о личности по ее id.",
       description = "Для отзыва статуса - волонтер, необходимо выбрать false")
@@ -118,8 +118,8 @@ public class PersonController {
           description = "произошла ошибка, не зависящая от вызывающей стороны"
       )
   })
-  public ResponseEntity<?> changeIsVolunteerIsFalse(@PathVariable Long id) {
-    Optional<Person> person = personService.getPersonById(id);
+  public ResponseEntity<?> changeIsVolunteerIsFalse(@PathVariable Long chat_id) {
+    Optional<Person> person = personService.getPersonByChatId(chat_id);
     person.ifPresent(personService::setPersonIsVolunteerIsFalse);
     return ResponseEntity.of(person);
   }
