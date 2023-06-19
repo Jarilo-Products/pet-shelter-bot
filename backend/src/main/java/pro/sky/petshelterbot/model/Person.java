@@ -56,4 +56,16 @@ public class Person {
   @Column(nullable = false)
   private Boolean isVolunteer;
 
+  public Person(Long chatId, String firstName, String lastName, String middleName, LocalDate birthdate,
+                String phone, String email, String address) {
+    this.chatId = chatId;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.middleName = middleName;
+    this.birthdate = birthdate;
+    this.phone = phone;
+    this.email = email;
+    this.address = address;
+    this.isVolunteer = false;
+  }
 }
