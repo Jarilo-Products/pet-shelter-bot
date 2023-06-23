@@ -8,10 +8,10 @@ import java.util.Optional;
 
 public interface PersonRepository extends JpaRepository<Person, Long> {
 
-  Optional<Person> findPersonById(Long id);
-
   Person getPersonByChatIdAndIsVolunteerIsTrue(Long chatId);
 
   List<Person> getPeopleByIsVolunteerIsTrue();
+
+  Optional<Person> getPersonByChatId(Long chat_id);
 
 }
