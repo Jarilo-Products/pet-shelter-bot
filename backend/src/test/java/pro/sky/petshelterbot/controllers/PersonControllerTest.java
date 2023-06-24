@@ -1,6 +1,7 @@
 package pro.sky.petshelterbot.controllers;
 
 import org.json.JSONObject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -9,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import pro.sky.petshelterbot.model.Person;
+import pro.sky.petshelterbot.model.Pet;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -22,6 +25,16 @@ class PersonControllerTest {
 
   @Autowired
   private MockMvc mockMvc;
+  private static Person person;
+  private static Pet pet;
+
+  @BeforeEach
+  void setUp() {
+    person = new Person();
+    person.setChatId(1L);
+    pet = new Pet();
+    pet.setId(1L);
+  }
 
   @Test
   public void getAllPersonTest() throws Exception {
@@ -130,4 +143,10 @@ class PersonControllerTest {
         .andExpect(status().isOk());
   }
 
+  @Test
+  void shouldAssignTheAnimalToThePerson() throws Exception {
+    mockMvc.perform(patch("/persons/assignAnimal/{chat_id}/{id}",
+            person.getChatId(), pet.getId()))
+            .andExpect(status().isOk());
+  }
 }
