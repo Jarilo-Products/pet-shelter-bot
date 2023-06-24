@@ -68,7 +68,7 @@ public class PersonController {
       )
   })
   public ResponseEntity<?> getAllVolunteer() {
-    List<Person> allVolunteer = personService.getAllVolunteer();
+    List<Person> allVolunteer = personService.getVolunteers();
     if (!allVolunteer.isEmpty()) {
       return ResponseEntity.ok(allVolunteer);
     } else {

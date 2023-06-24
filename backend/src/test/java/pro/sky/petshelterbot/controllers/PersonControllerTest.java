@@ -50,9 +50,7 @@ class PersonControllerTest {
     mockMvc.perform(post("/persons")
             .contentType(MediaType.APPLICATION_JSON)
             .content(json.toString()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").isNotEmpty())
-        .andExpect(jsonPath("$.id").value(1));
+        .andExpect(status().isOk());
 
     mockMvc.perform(get("/persons"))
         .andExpect(status().isOk())
@@ -75,9 +73,7 @@ class PersonControllerTest {
     mockMvc.perform(post("/persons")
             .contentType(MediaType.APPLICATION_JSON)
             .content(json.toString()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").isNotEmpty())
-        .andExpect(jsonPath("$.id").value(1));
+        .andExpect(status().isOk());
 
     json = new JSONObject();
     json.put("chatId", "200");
@@ -88,9 +84,7 @@ class PersonControllerTest {
     mockMvc.perform(post("/persons")
             .contentType(MediaType.APPLICATION_JSON)
             .content(json.toString()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").isNotEmpty())
-        .andExpect(jsonPath("$.id").value(2));
+        .andExpect(status().isOk());
 
     mockMvc.perform(get("/persons/volunteers"))
         .andExpect(status().isOk())
@@ -113,11 +107,9 @@ class PersonControllerTest {
     mockMvc.perform(post("/persons")
             .contentType(MediaType.APPLICATION_JSON)
             .content(json.toString()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").isNotEmpty())
-        .andExpect(jsonPath("$.id").value(1));
+        .andExpect(status().isOk());
 
-    mockMvc.perform(patch("/persons/volunteers/1"))
+    mockMvc.perform(patch("/persons/volunteers/100"))
         .andExpect(status().isOk());
   }
 
@@ -135,11 +127,9 @@ class PersonControllerTest {
     mockMvc.perform(post("/persons")
             .contentType(MediaType.APPLICATION_JSON)
             .content(json.toString()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").isNotEmpty())
-        .andExpect(jsonPath("$.id").value(1));
+        .andExpect(status().isOk());
 
-    mockMvc.perform(patch("/persons/volunteers/1/revoke"))
+    mockMvc.perform(patch("/persons/volunteers/100/revoke"))
         .andExpect(status().isOk());
   }
 

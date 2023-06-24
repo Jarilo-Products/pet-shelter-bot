@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pro.sky.petshelterbot.model.LastCommand;
 import pro.sky.petshelterbot.model.Person;
 import pro.sky.petshelterbot.model.enums.Type;
-import pro.sky.petshelterbot.processor.TextMessageProcessor;
+import pro.sky.petshelterbot.processor.MessageProcessor;
 import pro.sky.petshelterbot.service.LastCommandService;
 import pro.sky.petshelterbot.service.PersonService;
 
@@ -47,13 +47,13 @@ class TelegramBotUpdatesListenerTest {
   private PersonService personService;
 
   @InjectMocks
-  private TextMessageProcessor textMessageProcessor;
+  private MessageProcessor messageProcessor;
 
   private TelegramBotUpdatesListener telegramBotUpdatesListener;
 
   @BeforeEach
   public void initTelegramBotUpdatesListener() {
-    telegramBotUpdatesListener = new TelegramBotUpdatesListener(telegramBot, textMessageProcessor);
+    telegramBotUpdatesListener = new TelegramBotUpdatesListener(telegramBot, messageProcessor);
   }
 
   @Test
@@ -207,7 +207,7 @@ class TelegramBotUpdatesListenerTest {
     lastCommand.setIsClosed(true);
 
     Person person = new Person();
-    person.setId(2L);
+    person.setChatId(2L);
     person.setChatId(200L);
     person.setFirstName("Ivan");
 

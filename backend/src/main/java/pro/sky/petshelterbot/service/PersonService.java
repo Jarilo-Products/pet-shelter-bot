@@ -25,10 +25,6 @@ public class PersonService {
     return personRepository.findAll();
   }
 
-  public List<Person> getAllVolunteer() {
-    return personRepository.getPeopleByIsVolunteerIsTrue();
-  }
-
   public Optional<Person> getPersonByChatId(Long chat_id) {
     return personRepository.getPersonByChatId(chat_id);
   }

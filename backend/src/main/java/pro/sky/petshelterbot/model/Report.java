@@ -33,7 +33,7 @@ public class Report {
   @JoinColumn(name = "chat_id", nullable = false)
   private Person person;
 
-  private String file_id;
+  private String fileId;
 
   @Column(nullable = false)
   private String text;

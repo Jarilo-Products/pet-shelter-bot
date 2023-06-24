@@ -2,8 +2,6 @@ package pro.sky.petshelterbot.processor;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Message;
-import com.pengrad.telegrambot.request.SendMessage;
-import com.pengrad.telegrambot.response.SendResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import pro.sky.petshelterbot.model.LastCommand;
@@ -11,6 +9,7 @@ import pro.sky.petshelterbot.model.Person;
 import pro.sky.petshelterbot.model.enums.Type;
 import pro.sky.petshelterbot.service.LastCommandService;
 import pro.sky.petshelterbot.service.PersonService;
+import pro.sky.petshelterbot.utility.MessageSendingClass;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -22,22 +21,20 @@ import static pro.sky.petshelterbot.utility.TextUtils.*;
 
 @Component
 @Slf4j
-public class TextMessageProcessor {
+public class MessageProcessor extends MessageSendingClass {
 
   private final Pattern VOLUNTEER_ANSWERING_TO_USER_PATTERN = Pattern.compile(
       "^ *[\\[]\\d+[\\]].+$");
 
-  protected final TelegramBot telegramBot;
-  protected final LastCommandService lastCommandService;
-  protected final PersonService personService;
-
+  private final LastCommandService lastCommandService;
+  private final PersonService personService;
   private final ReportProcessor reportProcessor;
 
-  public TextMessageProcessor(TelegramBot telegramBot,
-                              LastCommandService lastCommandService,
-                              PersonService personService,
-                              ReportProcessor reportProcessor) {
-    this.telegramBot = telegramBot;
+  public MessageProcessor(TelegramBot telegramBot,
+                          LastCommandService lastCommandService,
+                          PersonService personService,
+                          ReportProcessor reportProcessor) {
+    super(telegramBot);
     this.lastCommandService = lastCommandService;
     this.personService = personService;
     this.reportProcessor = reportProcessor;
@@ -61,9 +58,10 @@ public class TextMessageProcessor {
     }
 
     // Обработка ответа волонтера пользователю
-    if (personService.isChatOfVolunteer(chatId)
+    if (message.photo().length == 0
+        && personService.isChatOfVolunteer(chatId)
         && VOLUNTEER_ANSWERING_TO_USER_PATTERN.matcher(text).matches()) {
-      processVolunteerAnswering(text, chatId);
+      processVolunteerAnswering(text, chatId); // TODO: поддержка пересылки картинок
       return;
     }
 
@@ -90,14 +88,6 @@ public class TextMessageProcessor {
       }
     }
     lastCommandService.save(lastCommand);
-  }
-
-  protected void sendMessage(long chatId, String message) {
-    SendMessage sendMessage = new SendMessage(chatId, message);
-    SendResponse sendResponse = telegramBot.execute(sendMessage);
-    if (!sendResponse.isOk()) {
-      log.error("Error during sending message: {}", sendResponse.description());
-    }
   }
 
   /**
@@ -140,7 +130,7 @@ public class TextMessageProcessor {
    *                    Если <code>isClosed == false</code>, то пользователь должен завершить
    *                    использование последней команды.
    * @param text        "1" – приют для кошек, "2" – приют для собак. При любом другом значении предлагается
-   *                    повторно выбрать приют (вызывается метод {@link TextMessageProcessor#processStartCommand})
+   *                    повторно выбрать приют (вызывается метод {@link MessageProcessor#processStartCommand})
    */
   private void processChoosingShelter(LastCommand lastCommand, String text) {
     switch (text.trim()) {
