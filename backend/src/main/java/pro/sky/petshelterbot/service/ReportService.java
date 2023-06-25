@@ -18,7 +18,7 @@ public class ReportService {
     this.reportRepository = reportRepository;
   }
 
-  public Optional<Report> getReportByPersonAndData(Person person, LocalDate localDate) {
+  public Optional<Report> getReportByPersonAndDate(Person person, LocalDate localDate) {
     return reportRepository.getReportByPersonAndDate(person, localDate);
   }
 
