@@ -1,6 +1,7 @@
 package pro.sky.petshelterbot.service;
 
 import org.springframework.stereotype.Service;
+import pro.sky.petshelterbot.exceptions.NotFoundException;
 import pro.sky.petshelterbot.model.Pet;
 import pro.sky.petshelterbot.repository.PetRepository;
 
@@ -32,4 +33,12 @@ public class PetService {
     petRepository.deletePetById(id);
   }
 
+  public Pet findAnimalInTheDatabase(Long id) {
+    Optional<Pet> pet = petRepository.findPetById(id);
+      if (pet.isPresent()) {
+        return pet.get();
+      } else {
+        throw new NotFoundException("Указанное животное отсутствует в базе!");
+      }
+  }
 }

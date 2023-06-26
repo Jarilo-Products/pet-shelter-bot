@@ -1,11 +1,13 @@
 package pro.sky.petshelterbot.service;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pro.sky.petshelterbot.exceptions.NotFoundException;
 import pro.sky.petshelterbot.model.Pet;
 import pro.sky.petshelterbot.repository.PetRepository;
 
@@ -26,10 +28,11 @@ class PetServiceTest {
 
   @InjectMocks
   private PetService petService;
+  private static Pet pet1;
 
   @BeforeAll
   public static void initPets() {
-    Pet pet1 = new Pet();
+    pet1 = new Pet();
     pet1.setId(1L);
     Pet pet2 = new Pet();
     pet2.setId(2L);
@@ -68,5 +71,22 @@ class PetServiceTest {
     petService.delete(1L);
 
     verify(petRepository, times(1)).deletePetById(1L);
+  }
+
+  @Test
+  void shouldFindAnimalInTheDatabase() {
+    when(petRepository.findPetById(pet1.getId())).thenReturn(Optional.of(pet1));
+
+    Pet result = petService.findAnimalInTheDatabase(pet1.getId());
+    assertEquals(pet1, result);
+  }
+
+  @Test
+  void shouldBeAnExceptionIfThereIsNoAnimalInTheDatabase() {
+    when(petRepository.findPetById(pet1.getId())).thenReturn(Optional.empty());
+
+    NotFoundException exception = Assertions.assertThrows(NotFoundException.class,
+            () -> petService.findAnimalInTheDatabase(pet1.getId()));
+    Assertions.assertEquals("Указанное животное отсутствует в базе!", exception.getMessage());
   }
 }
