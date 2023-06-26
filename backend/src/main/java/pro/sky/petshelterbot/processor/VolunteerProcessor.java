@@ -19,15 +19,30 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import static pro.sky.petshelterbot.utility.CallbackUtils.BUTTONS;
 import static pro.sky.petshelterbot.utility.TextUtils.ANSWERS;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_MAIN;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_BAD_REPORT;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_CHAT_NOT_OPENED;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_END_USER;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_END_VOLUNTEER;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_NO_CHAT;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_NO_PERSON;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_NO_REPORT;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATION_DECISION_WRONG_FORMAT;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATION_END_USER;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATION_END_VOLUNTEER;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATION_EXTENDED_USER;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATION_EXTENDED_VOLUNTEER;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_WARNING_SENT;
 
 @Component
 @Slf4j
 public class VolunteerProcessor extends MessageSendingClass {
 
   public static final Pattern VOLUNTEER_ANSWERING_TO_USER_PATTERN = Pattern.compile(
-      "^ *[\\[]USER-\\d+[\\]](.|\\n)+$");
+      "^ *[\\[]USER-\\d+[\\]](.|\\n)*$");
   public static final Pattern VOLUNTEER_CHECKING_UP_THE_REPORT_PATTERN = Pattern.compile(
       "^ *[\\[]REPORT-\\d+[\\]](.|\\n)*$");
   public static final Pattern VOLUNTEER_PROBATION_DECISION_PATTERN = Pattern.compile(
@@ -78,14 +93,14 @@ public class VolunteerProcessor extends MessageSendingClass {
     Optional<LastCommand> userLastCommandOptional = lastCommandService.getByChatId(userChatId);
     TelegramMessage messageToVolunteer = new TelegramMessage(volunteerMessage.getChatId());
     if (userLastCommandOptional.isEmpty()) {
-      messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER + "_no_chat"));
+      messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER_NO_CHAT));
       sendMessage(messageToVolunteer);
       return;
     }
     LastCommand userLastCommand = userLastCommandOptional.get();
     if (!userLastCommand.getLastCommand().startsWith(COMMAND_VOLUNTEER)
         || userLastCommand.getIsClosed()) {
-      messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER + "_chat_not_opened"));
+      messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER_CHAT_NOT_OPENED));
       sendMessage(messageToVolunteer);
       return;
     }
@@ -93,16 +108,17 @@ public class VolunteerProcessor extends MessageSendingClass {
     String answer = volunteerMessage.getText().substring(volunteerMessage.getText().indexOf(']') + 1).trim();
     TelegramMessage messageToUser = new TelegramMessage(userChatId);
     if (answer.equalsIgnoreCase("end")) {
-      messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER + "_end")
+      messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER_END_VOLUNTEER)
           .replace("user_chat_id", userChatId.toString()));
       sendMessage(messageToVolunteer);
 
-      messageToUser.setText(ANSWERS.get(COMMAND_VOLUNTEER + "_end_user"));
-      sendMessage(messageToUser);
+      messageToUser.setText(ANSWERS.get(COMMAND_VOLUNTEER_END_USER));
+      Integer messageId = sendMessage(messageToUser, BUTTONS.get(COMMAND_MAIN));
       userLastCommand.setLastCommand(COMMAND_VOLUNTEER);
       userLastCommand.setIsClosed(true);
+      userLastCommand.setLastMessageId(messageId);
       lastCommandService.save(userLastCommand);
-    } else if (!answer.isBlank()) {
+    } else if (!answer.isBlank() || volunteerMessage.getFileId() != null) {
       messageToUser.setText(answer);
       messageToUser.setFileId(volunteerMessage.getFileId());
       sendMessage(messageToUser);
@@ -120,11 +136,11 @@ public class VolunteerProcessor extends MessageSendingClass {
     if (reportOptional.isEmpty()) {
       sendMessage(new TelegramMessage(
           volunteerMessage.getChatId(),
-          ANSWERS.get(COMMAND_VOLUNTEER + "_no_report")));
+          ANSWERS.get(COMMAND_VOLUNTEER_NO_REPORT)));
       return;
     }
-    sendMessage(new TelegramMessage(userChatId, ANSWERS.get(COMMAND_VOLUNTEER + "_bad_report")));
-    sendMessage(new TelegramMessage(volunteerMessage.getChatId(), ANSWERS.get(COMMAND_VOLUNTEER + "_warning_sent")));
+    sendMessage(new TelegramMessage(userChatId, ANSWERS.get(COMMAND_VOLUNTEER_BAD_REPORT)));
+    sendMessage(new TelegramMessage(volunteerMessage.getChatId(), ANSWERS.get(COMMAND_VOLUNTEER_WARNING_SENT)));
   }
 
   private void processVolunteersDecisionOfProbation(TelegramMessage volunteerMessage) {
@@ -138,11 +154,11 @@ public class VolunteerProcessor extends MessageSendingClass {
     TelegramMessage messageToUser = new TelegramMessage(userChatId);
     String answer = volunteerMessage.getText().substring(volunteerMessage.getText().indexOf(']') + 1).trim();
     if (answer.equalsIgnoreCase("end")) {
-      messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER + "_volunteer_probation_end")
+      messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER_PROBATION_END_VOLUNTEER)
           .replace("user_chat_id", userChatId.toString()));
       sendMessage(messageToVolunteer);
 
-      messageToUser.setText(ANSWERS.get(COMMAND_VOLUNTEER + "_user_probation_end"));
+      messageToUser.setText(ANSWERS.get(COMMAND_VOLUNTEER_PROBATION_END_USER));
       sendMessage(messageToUser);
 
       Pet pet = reportingPerson.getPet();
@@ -154,15 +170,15 @@ public class VolunteerProcessor extends MessageSendingClass {
         reportingPerson.setProbationEnd(LocalDate.now().plusDays(daysToAddToProbation));
         personService.save(reportingPerson);
 
-        messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER + "_volunteer_probation_extended")
+        messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER_PROBATION_EXTENDED_VOLUNTEER)
             .replace("user_chat_id", userChatId.toString()));
         sendMessage(messageToVolunteer);
 
-        messageToUser.setText(ANSWERS.get(COMMAND_VOLUNTEER + "_user_probation_extended")
+        messageToUser.setText(ANSWERS.get(COMMAND_VOLUNTEER_PROBATION_EXTENDED_USER)
             .replace("%DAYS%", daysToAddToProbation.toString()));
         sendMessage(messageToUser);
       } catch (NumberFormatException e) {
-        messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER + "_probation_decision_wrong_format"));
+        messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER_PROBATION_DECISION_WRONG_FORMAT));
         sendMessage(messageToVolunteer);
       }
     }
@@ -172,13 +188,13 @@ public class VolunteerProcessor extends MessageSendingClass {
     Optional<LastCommand> userLastCommandOptional = lastCommandService.getByChatId(userChatId);
     TelegramMessage messageToVolunteer = new TelegramMessage(volunteerMessage.getChatId());
     if (userLastCommandOptional.isEmpty()) {
-      messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER + "_no_chat"));
+      messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER_NO_CHAT));
       sendMessage(messageToVolunteer);
       return Optional.empty();
     }
     Optional<Person> reportingPersonOptional = personService.getPersonByChatId(userChatId);
     if (reportingPersonOptional.isEmpty()) {
-      messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER + "_no_person"));
+      messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER_NO_PERSON));
       sendMessage(messageToVolunteer);
     }
 

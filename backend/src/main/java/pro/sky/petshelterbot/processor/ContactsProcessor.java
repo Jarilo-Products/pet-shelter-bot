@@ -11,8 +11,16 @@ import pro.sky.petshelterbot.service.PersonService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import static pro.sky.petshelterbot.utility.CallbackUtils.BUTTONS;
 import static pro.sky.petshelterbot.utility.TextUtils.ANSWERS;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_MAIN;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_SEND_CONTACTS;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_SEND_CONTACTS_ACCEPTED;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_SEND_CONTACTS_INVALID;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_SEND_CONTACTS_INVALID_BIRTHDATE;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_SEND_CONTACTS_INVALID_EMAIL;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_SEND_CONTACTS_INVALID_NAME;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_SEND_CONTACTS_NOT_ENOUGH;
 
 @Component
 public class ContactsProcessor extends MessageSendingClass {
@@ -39,8 +47,9 @@ public class ContactsProcessor extends MessageSendingClass {
     TelegramMessage message = new TelegramMessage(lastCommand.getChatId());
     String[] lines = userMessage.getText().split("\n");
     if (lines.length < 5) {
-      message.setText(ANSWERS.get(COMMAND_SEND_CONTACTS + "_notenough"));
-      sendMessage(message);
+      message.setText(ANSWERS.get(COMMAND_SEND_CONTACTS_NOT_ENOUGH));
+      Integer messageId = sendMessage(message, BUTTONS.get(COMMAND_SEND_CONTACTS));
+      lastCommand.setLastMessageId(messageId);
       return;
     }
 
@@ -53,22 +62,23 @@ public class ContactsProcessor extends MessageSendingClass {
     boolean isValid = true;
     StringBuilder error = new StringBuilder();
     if (!fullName.matches("^[а-яёА-ЯЁ-]+\s[а-яёА-ЯЁ-]+\s[а-яёА-ЯЁ-]+$")) {
-      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS + "_invalid_name")).append('\n');
+      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS_INVALID_NAME)).append('\n');
       isValid = false;
     }
     if (!birthdate.matches("^\\d{2}[.]\\d{2}[.]\\d{4}$")) {
-      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS + "_invalid_bithdate")).append('\n');
+      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS_INVALID_BIRTHDATE)).append('\n');
       isValid = false;
     }
     if (!email.matches("^[\\w.]+@[\\w.]+\\.[A-Za-z]{2,6}$")) {
-      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS + "_invalid_email")).append('\n');
+      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS_INVALID_EMAIL)).append('\n');
       isValid = false;
     }
 
     if (!isValid) {
-      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS + "_invalid"));
+      error.append(ANSWERS.get(COMMAND_SEND_CONTACTS_INVALID));
       message.setText(error.toString());
-      sendMessage(message);
+      Integer messageId = sendMessage(message, BUTTONS.get(COMMAND_SEND_CONTACTS));
+      lastCommand.setLastMessageId(messageId);
     } else {
       String[] nameParts = fullName.split(" ");
       String firstName = nameParts[1];
@@ -87,8 +97,9 @@ public class ContactsProcessor extends MessageSendingClass {
       personService.save(person);
 
       lastCommand.setIsClosed(true);
-      message.setText(ANSWERS.get("acceptedcontacts"));
-      sendMessage(message);
+      message.setText(ANSWERS.get(COMMAND_SEND_CONTACTS_ACCEPTED));
+      Integer messageId = sendMessage(message, BUTTONS.get(COMMAND_MAIN));
+      lastCommand.setLastMessageId(messageId);
     }
   }
 

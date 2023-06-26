@@ -1,6 +1,8 @@
 package pro.sky.petshelterbot.message;
 
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SendPhoto;
 import com.pengrad.telegrambot.response.SendResponse;
@@ -15,11 +17,12 @@ public abstract class MessageSendingClass {
     this.telegramBot = telegramBot;
   }
 
-  protected void sendMessage(TelegramMessage telegramMessage) {
+  protected Integer sendMessage(TelegramMessage telegramMessage) {
     SendResponse sendResponse;
     if (telegramMessage.getFileId() != null) {
       SendPhoto sendPhoto = new SendPhoto(telegramMessage.getChatId(), telegramMessage.getFileId());
       sendPhoto.caption(telegramMessage.getText());
+      sendPhoto.parseMode(ParseMode.Markdown);
       sendResponse = telegramBot.execute(sendPhoto);
     } else {
       SendMessage sendMessage = new SendMessage(telegramMessage.getChatId(), telegramMessage.getText());
@@ -28,6 +31,27 @@ public abstract class MessageSendingClass {
     if (!sendResponse.isOk()) {
       log.error("Error during sending message: {}", sendResponse.description());
     }
+    return sendResponse.message().messageId();
+  }
+
+  protected Integer sendMessage(TelegramMessage telegramMessage, InlineKeyboardMarkup buttons) {
+    SendResponse sendResponse;
+    if (telegramMessage.getFileId() != null) {
+      SendPhoto sendPhoto = new SendPhoto(telegramMessage.getChatId(), telegramMessage.getFileId());
+      sendPhoto.caption(telegramMessage.getText());
+      sendPhoto.replyMarkup(buttons);
+      sendPhoto.parseMode(ParseMode.Markdown);
+      sendResponse = telegramBot.execute(sendPhoto);
+    } else {
+      SendMessage sendMessage = new SendMessage(telegramMessage.getChatId(), telegramMessage.getText());
+      sendMessage.replyMarkup(buttons);
+      sendMessage.parseMode(ParseMode.Markdown);
+      sendResponse = telegramBot.execute(sendMessage);
+    }
+    if (!sendResponse.isOk()) {
+      log.error("Error during sending message: {}", sendResponse.description());
+    }
+    return sendResponse.message().messageId();
   }
 
 }

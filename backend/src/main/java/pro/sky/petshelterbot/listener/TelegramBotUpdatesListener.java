@@ -2,6 +2,7 @@ package pro.sky.petshelterbot.listener;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
+import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import lombok.extern.slf4j.Slf4j;
@@ -33,11 +34,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
   public int process(List<Update> updates) {
     try {
       updates.stream()
-          .filter(update -> update.message() != null)
+          .filter(update -> update.message() != null || update.callbackQuery() != null)
           .forEach(update -> {
             log.info("Processing update: {}", update);
             Message message = update.message();
-            messageProcessor.processTextMessage(message);
+            CallbackQuery callbackQuery = update.callbackQuery();
+            messageProcessor.processTextMessage(message, callbackQuery);
           });
     } catch (Exception e) {
       log.error(e.getMessage(), e);

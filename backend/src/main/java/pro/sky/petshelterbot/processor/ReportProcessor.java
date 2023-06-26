@@ -7,7 +7,6 @@ import pro.sky.petshelterbot.message.TelegramMessage;
 import pro.sky.petshelterbot.model.LastCommand;
 import pro.sky.petshelterbot.model.Person;
 import pro.sky.petshelterbot.model.Report;
-import pro.sky.petshelterbot.service.LastCommandService;
 import pro.sky.petshelterbot.service.PersonService;
 import pro.sky.petshelterbot.service.ReportService;
 import pro.sky.petshelterbot.message.MessageSendingClass;
@@ -16,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static pro.sky.petshelterbot.utility.CallbackUtils.BUTTONS;
 import static pro.sky.petshelterbot.utility.TextUtils.*;
 
 @Component
@@ -23,16 +23,13 @@ import static pro.sky.petshelterbot.utility.TextUtils.*;
 public class ReportProcessor extends MessageSendingClass {
 
   private final ReportService reportService;
-  private final LastCommandService lastCommandService;
   private final PersonService personService;
 
   public ReportProcessor(TelegramBot telegramBot,
                          ReportService reportService,
-                         LastCommandService lastCommandService,
                          PersonService personService) {
     super(telegramBot);
     this.reportService = reportService;
-    this.lastCommandService = lastCommandService;
     this.personService = personService;
   }
 
@@ -58,34 +55,42 @@ public class ReportProcessor extends MessageSendingClass {
       report = reportOptional.get();
     }
 
+    Integer messageId = null;
     if (message.getText() != null && message.getFileId() != null) {
       report.setText(message.getText());
       report.setFileId(message.getFileId());
-    } else if (message.getFileId() != null) {
-      report.setFileId(message.getFileId());
-      if (report.getText() == null) {
-        sendMessage(new TelegramMessage(lastCommand.getChatId(), ANSWERS.get(COMMAND_NO_TEXT_REPORT)));
-      }
     } else if (message.getText() != null) {
       report.setText(message.getText());
       if (report.getFileId() == null) {
-        sendMessage(new TelegramMessage(lastCommand.getChatId(), ANSWERS.get(COMMAND_NO_PHOTO_REPORT)));
+        messageId = sendMessage(new TelegramMessage(
+                lastCommand.getChatId(),
+                ANSWERS.get(COMMAND_NO_PHOTO_REPORT)
+            ),
+            BUTTONS.get(COMMAND_SEND_REPORT));
       }
     }
 
-    reportService.save(report);
     if (report.getText() != null && report.getFileId() != null) {
       lastCommand.setIsClosed(true);
       TelegramMessage messageToUser = new TelegramMessage(lastCommand.getChatId());
       if (report.getDate().isAfter(LocalDate.now())) {
         messageToUser.setText(ANSWERS.get(COMMAND_LOSING_TIME_REPORT));
-        sendMessage(messageToUser);
       } else {
         messageToUser.setText(ANSWERS.get(COMMAND_SUCCESSFUL_REPORT));
-        sendMessage(messageToUser);
+      }
+      messageId = sendMessage(messageToUser, BUTTONS.get(COMMAND_MAIN));
+    } else if (message.getFileId() != null) {
+      report.setFileId(message.getFileId());
+      if (report.getText() == null) {
+        messageId = sendMessage(new TelegramMessage(
+                lastCommand.getChatId(),
+                ANSWERS.get(COMMAND_NO_TEXT_REPORT)
+            ),
+            BUTTONS.get(COMMAND_SEND_REPORT));
       }
     }
-    lastCommandService.save(lastCommand);
+    lastCommand.setLastMessageId(messageId);
+    reportService.save(report);
   }
 
 }

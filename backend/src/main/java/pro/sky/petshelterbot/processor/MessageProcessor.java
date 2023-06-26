@@ -1,7 +1,12 @@
 package pro.sky.petshelterbot.processor;
 
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import com.pengrad.telegrambot.request.AnswerCallbackQuery;
+import com.pengrad.telegrambot.request.DeleteMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import pro.sky.petshelterbot.message.TelegramMessage;
@@ -13,11 +18,13 @@ import pro.sky.petshelterbot.service.PersonService;
 import pro.sky.petshelterbot.message.MessageSendingClass;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static pro.sky.petshelterbot.processor.VolunteerProcessor.VOLUNTEER_ANSWERING_TO_USER_PATTERN;
 import static pro.sky.petshelterbot.processor.VolunteerProcessor.VOLUNTEER_CHECKING_UP_THE_REPORT_PATTERN;
 import static pro.sky.petshelterbot.processor.VolunteerProcessor.VOLUNTEER_PROBATION_DECISION_PATTERN;
+import static pro.sky.petshelterbot.utility.CallbackUtils.BUTTONS;
 import static pro.sky.petshelterbot.utility.TextUtils.*;
 
 @Component
@@ -47,20 +54,28 @@ public class MessageProcessor extends MessageSendingClass {
   /**
    * Обработка текстового сообщения от пользователя бота
    */
-  public void processTextMessage(Message message) {
-    long chatId = message.chat().id();
-    TelegramMessage telegramMessage = new TelegramMessage(chatId);
-    if (message.text() != null) {
-      telegramMessage.setText((message.text().trim()));
-    } else if (message.caption() != null) {
-      telegramMessage.setText((message.caption().trim()));
-    }
-    if (message.photo() != null && message.photo().length > 0) {
-      telegramMessage.setFileId(message.photo()[0].fileId());
+  public void processTextMessage(Message message, CallbackQuery callbackQuery) {
+    long chatId;
+    TelegramMessage telegramMessage;
+    if (message != null) {
+      chatId = message.chat().id();
+      telegramMessage = new TelegramMessage(chatId);
+      if (message.text() != null) {
+        telegramMessage.setText((message.text().trim()));
+      } else if (message.caption() != null) {
+        telegramMessage.setText((message.caption().trim()));
+      }
+      if (message.photo() != null && message.photo().length > 0) {
+        telegramMessage.setFileId(message.photo()[0].fileId());
+      }
+    } else {
+      chatId = callbackQuery.message().chat().id();
+      telegramMessage = new TelegramMessage(chatId, callbackQuery.data());
     }
     Optional<LastCommand> optionalLastCommand = lastCommandService.getByChatId(chatId);
     // Пользователь в первый раз зашел в бота и ввел какую-то хрень
-    if (optionalLastCommand.isEmpty() && !telegramMessage.getText().equalsIgnoreCase("/start")) {
+    if (optionalLastCommand.isEmpty() && telegramMessage.getText() != null
+        && !telegramMessage.getText().equalsIgnoreCase("/start")) {
       return;
     }
     // Пользователь в первый раз зашел в бота и ввел "/start"
@@ -73,14 +88,26 @@ public class MessageProcessor extends MessageSendingClass {
     if (telegramMessage.getText() != null && !telegramMessage.getText().isBlank()
         && personService.isChatOfVolunteer(chatId)
         && (VOLUNTEER_ANSWERING_TO_USER_PATTERN.matcher(telegramMessage.getText()).matches()
-        || VOLUNTEER_CHECKING_UP_THE_REPORT_PATTERN.matcher(telegramMessage.getText()).matches())
-        || VOLUNTEER_PROBATION_DECISION_PATTERN.matcher(telegramMessage.getText()).matches()) {
+        || VOLUNTEER_CHECKING_UP_THE_REPORT_PATTERN.matcher(telegramMessage.getText()).matches()
+        || VOLUNTEER_PROBATION_DECISION_PATTERN.matcher(telegramMessage.getText()).matches())) {
       volunteerProcessor.processVolunteersMessage(telegramMessage);
+      if (callbackQuery != null) {
+        telegramBot.execute(new AnswerCallbackQuery(callbackQuery.id()));
+      }
       return;
     }
 
     // Если дошли до сюда, то пользователь уже общался с ботом
     LastCommand lastCommand = optionalLastCommand.get();
+    if (BREAKING_COMMANDS.contains(telegramMessage.getText())) {
+      lastCommand.setIsClosed(true);
+      if (lastCommand.getLastMessageId() != null) {
+        telegramBot.execute(new DeleteMessage(chatId, lastCommand.getLastMessageId()));
+      }
+    } else if (lastCommand.getLastMessageId() != null && lastCommand.getIsClosed() ||
+        telegramMessage.getText() != null && telegramMessage.getText().startsWith(COMMAND_MAIN)) {
+      telegramBot.execute(new DeleteMessage(chatId, lastCommand.getLastMessageId()));
+    }
     if (!lastCommand.getIsClosed()) { // Обработка последних команд пользователя со статусом is_closed = false
       // Обработка сообщений пользователя, направленных волонтеру
       if (lastCommand.getLastCommand().startsWith(COMMAND_VOLUNTEER)) {
@@ -101,6 +128,9 @@ public class MessageProcessor extends MessageSendingClass {
         default -> processSingleAnswerCommand(lastCommand, telegramMessage);
       }
     }
+    if (callbackQuery != null) {
+      telegramBot.execute(new AnswerCallbackQuery(callbackQuery.id()));
+    }
     lastCommandService.save(lastCommand);
   }
 
@@ -111,11 +141,12 @@ public class MessageProcessor extends MessageSendingClass {
    */
   private void processFirstStartCommand(long chatId) {
     TelegramMessage message = new TelegramMessage(chatId, ANSWERS.get(COMMAND_START));
-    sendMessage(message);
+    Integer messageId = sendMessage(message, BUTTONS.get(COMMAND_START));
     LastCommand lastCommand = new LastCommand();
     lastCommand.setChatId(chatId);
     lastCommand.setLastCommand(COMMAND_START);
     lastCommand.setIsClosed(false);
+    lastCommand.setLastMessageId(messageId);
     lastCommandService.save(lastCommand);
   }
 
@@ -131,9 +162,10 @@ public class MessageProcessor extends MessageSendingClass {
   private void processStartCommand(LastCommand lastCommand) {
     TelegramMessage message = new TelegramMessage(lastCommand.getChatId(),
         ANSWERS.get(COMMAND_START + "_registered"));
-    sendMessage(message);
+    Integer messageId = sendMessage(message, BUTTONS.get(COMMAND_START));
     lastCommand.setLastCommand(COMMAND_START);
     lastCommand.setIsClosed(false);
+    lastCommand.setLastMessageId(messageId);
   }
 
   /**
@@ -149,17 +181,19 @@ public class MessageProcessor extends MessageSendingClass {
   private void processChoosingShelter(LastCommand lastCommand, TelegramMessage userMessage) {
     TelegramMessage message = new TelegramMessage(lastCommand.getChatId());
     switch (userMessage.getText()) {
-      case "1" -> {
-        message.setText(ANSWERS.get("chosen_CAT"));
-        sendMessage(message);
+      case COMMAND_MAIN_CAT -> {
+        message.setText(ANSWERS.get(COMMAND_MAIN_CAT));
+        Integer messageId = sendMessage(message, BUTTONS.get(COMMAND_MAIN));
         lastCommand.setIsClosed(true);
         lastCommand.setActiveType(Type.CAT);
+        lastCommand.setLastMessageId(messageId);
       }
-      case "2" -> {
-        message.setText(ANSWERS.get("chosen_DOG"));
-        sendMessage(message);
+      case COMMAND_MAIN_DOG -> {
+        message.setText(ANSWERS.get(COMMAND_MAIN_DOG));
+        Integer messageId = sendMessage(message, BUTTONS.get(COMMAND_MAIN));
         lastCommand.setIsClosed(true);
         lastCommand.setActiveType(Type.DOG);
+        lastCommand.setLastMessageId(messageId);
       }
       default -> processStartCommand(lastCommand);
     }
@@ -178,16 +212,27 @@ public class MessageProcessor extends MessageSendingClass {
    * @param userMessage сообщение пользователя (включает chat_id, текст и file_id)
    */
   private void processSingleAnswerCommand(LastCommand lastCommand, TelegramMessage userMessage) {
-    TelegramMessage message = new TelegramMessage(lastCommand.getChatId(),
-        ANSWERS.get(userMessage.getText() + "_" + lastCommand.getActiveType().name()));
+    String command = getOneObjectFromMap(ANSWERS,
+        userMessage.getText() + "_" + lastCommand.getActiveType().name(),
+        userMessage.getText());
+    TelegramMessage message = new TelegramMessage(lastCommand.getChatId(), command);
     if (message.getText() == null) {
       message.setText(UNKNOWN_COMMAND);
-      sendMessage(message);
+      lastCommand.setLastMessageId(sendMessage(message, BUTTONS.get(COMMAND_MAIN)));
       return;
     }
-    sendMessage(message);
+    Integer messageId;
+    InlineKeyboardMarkup buttons = getOneObjectFromMap(BUTTONS,
+        userMessage.getText(),
+        userMessage.getText() + "_" + lastCommand.getActiveType().name());
+    if (buttons != null) {
+      messageId = sendMessage(message, buttons);
+    } else {
+      messageId = sendMessage(message);
+    }
     lastCommand.setLastCommand(userMessage.getText());
     lastCommand.setIsClosed(true);
+    lastCommand.setLastMessageId(messageId);
   }
 
   /**
@@ -206,10 +251,11 @@ public class MessageProcessor extends MessageSendingClass {
     List<Person> volunteers = personService.getVolunteers();
     TelegramMessage messageToUser = new TelegramMessage(lastCommand.getChatId());
     if (volunteers.isEmpty()) {
-      messageToUser.setText(ANSWERS.get(COMMAND_VOLUNTEER + "_empty"));
-      sendMessage(messageToUser);
+      messageToUser.setText(ANSWERS.get(COMMAND_VOLUNTEER_EMPTY));
+      Integer messageId = sendMessage(messageToUser, BUTTONS.get(COMMAND_MAIN));
       lastCommand.setIsClosed(true);
       lastCommand.setLastCommand(COMMAND_VOLUNTEER);
+      lastCommand.setLastMessageId(messageId);
       return;
     }
 
@@ -221,7 +267,7 @@ public class MessageProcessor extends MessageSendingClass {
     lastCommand.setIsClosed(false);
 
     TelegramMessage messageToVolunteer = new TelegramMessage(randomVolunteer.getChatId(),
-        ANSWERS.get(COMMAND_VOLUNTEER + "_user_memo")
+        ANSWERS.get(COMMAND_VOLUNTEER_USER_MEMO)
             .replace("user_chat_id", lastCommand.getChatId().toString()));
     sendMessage(messageToVolunteer);
   }
@@ -239,9 +285,12 @@ public class MessageProcessor extends MessageSendingClass {
   private void processUserAsking(LastCommand lastCommand, TelegramMessage userMessage) {
     long volunteerChatId = Long.parseLong(lastCommand.getLastCommand().split(" ")[1]);
     TelegramMessage messageToVolunteer = new TelegramMessage(volunteerChatId,
-        "[USER-" + lastCommand.getChatId().toString() + "] " + userMessage.getText(),
+        "\\[USER-" + lastCommand.getChatId().toString() + "] " + userMessage.getText(),
         userMessage.getFileId());
-    sendMessage(messageToVolunteer);
+    InlineKeyboardButton closeChatButtonForVolunteer = new InlineKeyboardButton("Закрыть этот чат")
+        .callbackData("[USER-" + lastCommand.getChatId().toString() + "] end");
+    sendMessage(messageToVolunteer, new InlineKeyboardMarkup(closeChatButtonForVolunteer));
+    lastCommand.setLastMessageId(null);
   }
 
   /**
@@ -255,9 +304,10 @@ public class MessageProcessor extends MessageSendingClass {
    */
   private void processSendContactsCommand(LastCommand lastCommand) {
     TelegramMessage message = new TelegramMessage(lastCommand.getChatId(), ANSWERS.get(COMMAND_SEND_CONTACTS));
-    sendMessage(message);
-    lastCommand.setLastCommand(COMMAND_SEND_CONTACTS);
+    Integer messageId = sendMessage(message, BUTTONS.get(COMMAND_SEND_CONTACTS));
     lastCommand.setIsClosed(false);
+    lastCommand.setLastCommand(COMMAND_SEND_CONTACTS);
+    lastCommand.setLastMessageId(messageId);
   }
 
   /**
@@ -272,14 +322,21 @@ public class MessageProcessor extends MessageSendingClass {
   private void processSendReportCommand(LastCommand lastCommand) {
     Optional<Person> optionalPerson = personService.getPersonByChatId(lastCommand.getChatId());
     TelegramMessage message = new TelegramMessage(lastCommand.getChatId());
+    Integer messageId;
     if (optionalPerson.isPresent() && optionalPerson.get().getPet() != null) {
       message.setText(ANSWERS.get(COMMAND_SEND_REPORT));
-      sendMessage(message);
+      messageId = sendMessage(message, BUTTONS.get(COMMAND_SEND_REPORT));
       lastCommand.setLastCommand(COMMAND_SEND_REPORT);
       lastCommand.setIsClosed(false);
     } else {
       message.setText(ANSWERS.get(COMMAND_NO_PET_REPORT));
-      sendMessage(message);
+      messageId = sendMessage(message, BUTTONS.get(COMMAND_MAIN));
     }
+    lastCommand.setLastMessageId(messageId);
+  }
+
+  private static <T> T getOneObjectFromMap(Map<String, T> map, String key1, String key2) {
+    T result = map.get(key1);
+    return result != null ? result : map.get(key2);
   }
 }
