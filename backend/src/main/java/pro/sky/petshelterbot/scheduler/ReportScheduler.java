@@ -44,8 +44,8 @@ public class ReportScheduler extends MessageSendingClass {
   /**
    * Метод, рассылающий отчеты по волонтерам в 21:00.
    */
-  @Scheduled(cron = "0 2 20 * * ?", zone = "Europe/Moscow")
-  private void sendReportsToVolunteers() {
+  @Scheduled(cron = "0 0 21 * * ?", zone = "Europe/Moscow")
+  public void sendReportsToVolunteers() {
     LocalDateTime now = LocalDateTime.now();
     LocalDate today = now.toLocalDate();
     List<Report> reports = reportService.getReportsByDate(today);

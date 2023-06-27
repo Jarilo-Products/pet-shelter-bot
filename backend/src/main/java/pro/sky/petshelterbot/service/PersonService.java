@@ -16,7 +16,8 @@ public class PersonService {
   private final PetService petService;
   private final PersonRepository personRepository;
 
-  public PersonService(PetService petService, PersonRepository personRepository) {
+  public PersonService(PetService petService,
+                       PersonRepository personRepository) {
     this.petService = petService;
     this.personRepository = personRepository;
   }
@@ -51,14 +52,17 @@ public class PersonService {
     personRepository.save(person);
   }
 
-  public void addAnAnimalToAPerson(Long chat_id, Long id) {
-     Optional<Person> person = getPersonByChatId(chat_id);
-     if (person.isPresent()) {
-      Pet pet = petService.findAnimalInTheDatabase(id);
-      person.get().setPet(pet);
-      person.get().setProbationEnd(LocalDate.now().plus(Period.ofMonths(1)));
-     } else {
-        throw new NotFoundException("Указанный человек отсутствует в базе!");
-     }
+  public void addAnAnimalToAPerson(Long personChatId, Long petId) {
+    Optional<Person> personOptional = getPersonByChatId(personChatId);
+    Optional<Pet> petOptional = petService.getPetById(petId);
+    if (personOptional.isPresent() && petOptional.isPresent()) {
+      Person person = personOptional.get();
+      Pet pet = petOptional.get();
+      person.setPet(pet);
+      person.setProbationEnd(LocalDate.now().plus(Period.ofMonths(1)));
+      personRepository.save(person);
+    } else {
+      throw new NotFoundException("Указанный человек отсутствует в базе!");
+    }
   }
 }

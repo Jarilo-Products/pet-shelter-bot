@@ -1,0 +1,10 @@
+{
+  "result": {
+    "messageId": 1,
+    "chat":{
+      "id": 1
+    },
+    "text": "%text%"
+  },
+  "ok": true
+}

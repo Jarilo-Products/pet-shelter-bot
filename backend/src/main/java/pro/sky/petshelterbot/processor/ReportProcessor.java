@@ -11,6 +11,7 @@ import pro.sky.petshelterbot.service.PersonService;
 import pro.sky.petshelterbot.service.ReportService;
 import pro.sky.petshelterbot.message.MessageSendingClass;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -24,17 +25,20 @@ public class ReportProcessor extends MessageSendingClass {
 
   private final ReportService reportService;
   private final PersonService personService;
+  private final Clock clock;
 
   public ReportProcessor(TelegramBot telegramBot,
                          ReportService reportService,
-                         PersonService personService) {
+                         PersonService personService,
+                         Clock clock) {
     super(telegramBot);
     this.reportService = reportService;
     this.personService = personService;
+    this.clock = clock;
   }
 
   public void processReportMessage(TelegramMessage message, LastCommand lastCommand) {
-    LocalDate now = LocalDateTime.now().getHour() > 21
+    LocalDate now = LocalDateTime.now(clock).getHour() > 21
         ? LocalDateTime.now().plusDays(1).toLocalDate()
         : LocalDateTime.now().toLocalDate();
     Optional<Person> personOptional = personService.getPersonByChatId(lastCommand.getChatId());
@@ -68,6 +72,15 @@ public class ReportProcessor extends MessageSendingClass {
             ),
             BUTTONS.get(COMMAND_SEND_REPORT));
       }
+    } else if (message.getFileId() != null) {
+      report.setFileId(message.getFileId());
+      if (report.getText() == null) {
+        messageId = sendMessage(new TelegramMessage(
+                lastCommand.getChatId(),
+                ANSWERS.get(COMMAND_NO_TEXT_REPORT)
+            ),
+            BUTTONS.get(COMMAND_SEND_REPORT));
+      }
     }
 
     if (report.getText() != null && report.getFileId() != null) {
@@ -79,15 +92,6 @@ public class ReportProcessor extends MessageSendingClass {
         messageToUser.setText(ANSWERS.get(COMMAND_SUCCESSFUL_REPORT));
       }
       messageId = sendMessage(messageToUser, BUTTONS.get(COMMAND_MAIN));
-    } else if (message.getFileId() != null) {
-      report.setFileId(message.getFileId());
-      if (report.getText() == null) {
-        messageId = sendMessage(new TelegramMessage(
-                lastCommand.getChatId(),
-                ANSWERS.get(COMMAND_NO_TEXT_REPORT)
-            ),
-            BUTTONS.get(COMMAND_SEND_REPORT));
-      }
     }
     lastCommand.setLastMessageId(messageId);
     reportService.save(report);
