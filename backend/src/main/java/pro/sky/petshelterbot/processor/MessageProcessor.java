@@ -140,7 +140,9 @@ public class MessageProcessor extends MessageSendingClass {
    * @param chatId id чата
    */
   private void processFirstStartCommand(long chatId) {
-    TelegramMessage message = new TelegramMessage(chatId, ANSWERS.get(COMMAND_START));
+    TelegramMessage message = new TelegramMessage(chatId,
+        ANSWERS.get(COMMAND_START),
+        "AgACAgIAAxkBAAIFg2Scd3yoRLr4PH8Bpb5LLEf8CsROAAI6zTEbvmboSE70_CgoBMYaAQADAgADcwADLwQ");
     Integer messageId = sendMessage(message, BUTTONS.get(COMMAND_START));
     LastCommand lastCommand = new LastCommand();
     lastCommand.setChatId(chatId);
@@ -161,7 +163,8 @@ public class MessageProcessor extends MessageSendingClass {
    */
   private void processStartCommand(LastCommand lastCommand) {
     TelegramMessage message = new TelegramMessage(lastCommand.getChatId(),
-        ANSWERS.get(COMMAND_START + "_registered"));
+        ANSWERS.get(COMMAND_START + "_registered"),
+        "AgACAgIAAxkBAAIFg2Scd3yoRLr4PH8Bpb5LLEf8CsROAAI6zTEbvmboSE70_CgoBMYaAQADAgADcwADLwQ");
     Integer messageId = sendMessage(message, BUTTONS.get(COMMAND_START));
     lastCommand.setLastCommand(COMMAND_START);
     lastCommand.setIsClosed(false);

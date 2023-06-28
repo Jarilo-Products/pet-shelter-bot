@@ -25,33 +25,26 @@ import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_SEND_CONTACTS;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_SEND_REPORT;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_START;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_TRANSPORTATION;
-import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER;
 
 public class CallbackUtils {
 
   public static Map<String, InlineKeyboardMarkup> BUTTONS = new HashMap<>() {{
     put(COMMAND_START, new InlineKeyboardMarkup(
-        new InlineKeyboardButton("🐱 Приют для кошек").callbackData("/main_CAT"),
-        new InlineKeyboardButton("🐶 Приют для собак").callbackData("/main_DOG")));
+        new InlineKeyboardButton("🐱 Для кошек").callbackData("/main_CAT"),
+        new InlineKeyboardButton("🐶 Для собак").callbackData("/main_DOG")));
 
     put(COMMAND_MAIN, new InlineKeyboardMarkup(
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Узнать информацию о приюте").callbackData(COMMAND_INFO)
+            new InlineKeyboardButton("\uD83D\uDD0E Получить информацию о приюте").callbackData(COMMAND_INFO)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Как взять животное из приюта").callbackData(COMMAND_HOW_TO_PET)
+            new InlineKeyboardButton("\uD83E\uDD32 Как взять животное из приюта").callbackData(COMMAND_HOW_TO_PET)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Оставить контактные данные").callbackData(COMMAND_SEND_CONTACTS)
+            new InlineKeyboardButton("\uD83D\uDCDD Оставить контактные данные").callbackData(COMMAND_SEND_CONTACTS)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Прислать отчет о питомце").callbackData(COMMAND_SEND_REPORT)
-        },
-        new InlineKeyboardButton[]{
-            new InlineKeyboardButton("\uD83C\uDD98 Позвать волонтера \uD83C\uDD98").callbackData(COMMAND_VOLUNTEER)
-        },
-        new InlineKeyboardButton[]{
-            new InlineKeyboardButton("🐱🐶 Выбор приюта 🐶🐱").callbackData(COMMAND_START)
+            new InlineKeyboardButton("\uD83D\uDCE9 Прислать отчет о питомце").callbackData(COMMAND_SEND_REPORT)
         }
     ));
     put(COMMAND_MAIN_CAT, get(COMMAND_MAIN));
@@ -59,102 +52,76 @@ public class CallbackUtils {
 
     put(COMMAND_INFO, new InlineKeyboardMarkup(
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("⏪ Назад на главную ⏪").callbackData(COMMAND_MAIN)
+            new InlineKeyboardButton("⏪ Назад ⏪").callbackData(COMMAND_MAIN)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("О приюте").callbackData(COMMAND_ABOUT),
+            new InlineKeyboardButton("😎 О приюте").callbackData(COMMAND_ABOUT),
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Адрес и расписание работы").callbackData(COMMAND_ADDRESS)
+            new InlineKeyboardButton("\uD83D\uDDD3 Адрес и расписание работы").callbackData(COMMAND_ADDRESS)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Контактные данные охраны").callbackData(COMMAND_GUARD)
+            new InlineKeyboardButton("👮🏻 Контактные данные охраны").callbackData(COMMAND_GUARD)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Техника безопасности").callbackData(COMMAND_SAFETY)
+            new InlineKeyboardButton("‼ Техника безопасности").callbackData(COMMAND_SAFETY)
         }
     ));
 
     put(COMMAND_HOW_TO_PET + "_CAT", new InlineKeyboardMarkup(
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("⏪ Назад на главную ⏪").callbackData(COMMAND_MAIN)
+            new InlineKeyboardButton("⏪ Назад ⏪").callbackData(COMMAND_MAIN)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Правила знакомства с животным до отъезда домой").callbackData(COMMAND_ACQUAINTANCE),
+            new InlineKeyboardButton("☝ Правила знакомства с животным").callbackData(COMMAND_ACQUAINTANCE),
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Список документов для оформления").callbackData(COMMAND_DOCUMENTS)
+            new InlineKeyboardButton("\uD83D\uDCC4 Список необходимых документов").callbackData(COMMAND_DOCUMENTS)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Рекомендации по транспортировке").callbackData(COMMAND_TRANSPORTATION)
+            new InlineKeyboardButton("🚗 О транспортировке").callbackData(COMMAND_TRANSPORTATION)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Рекомендации по обустройству места").callbackData(COMMAND_PLACE_PREPARATION)
+            new InlineKeyboardButton("\uD83E\uDDFA Об обустройстве места").callbackData(COMMAND_PLACE_PREPARATION)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Список причин, почему могут отказать").callbackData(COMMAND_REASONS_FOR_REFUSAL)
+            new InlineKeyboardButton("❌ Причины отказа").callbackData(COMMAND_REASONS_FOR_REFUSAL)
         }
     ));
 
     put(COMMAND_HOW_TO_PET + "_DOG", new InlineKeyboardMarkup(
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("⏪ Назад на главную ⏪").callbackData(COMMAND_MAIN)
+            new InlineKeyboardButton("⏪ Назад ⏪").callbackData(COMMAND_MAIN)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Правила знакомства с животным до отъезда домой").callbackData(COMMAND_ACQUAINTANCE),
+            new InlineKeyboardButton("☝ Правила знакомства с животным").callbackData(COMMAND_ACQUAINTANCE),
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Список документов для оформления").callbackData(COMMAND_DOCUMENTS)
+            new InlineKeyboardButton("\uD83D\uDCC4 Список необходимых документов").callbackData(COMMAND_DOCUMENTS)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Рекомендации по транспортировке").callbackData(COMMAND_TRANSPORTATION)
+            new InlineKeyboardButton("🚗 О транспортировке").callbackData(COMMAND_TRANSPORTATION)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Рекомендации по обустройству места").callbackData(COMMAND_PLACE_PREPARATION)
+            new InlineKeyboardButton("\uD83E\uDDFA Об обустройстве места").callbackData(COMMAND_PLACE_PREPARATION)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Советы кинолога при первом общении с собакой").callbackData(COMMAND_CYNOLOGIST_ADVICE)
+            new InlineKeyboardButton("\uD83E\uDDD0 Советы кинолога").callbackData(COMMAND_CYNOLOGIST_ADVICE)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Список проверенных кинологов").callbackData(COMMAND_CYNOLOGIST_LIST)
+            new InlineKeyboardButton("\uD83E\uDD13 Список проверенных кинологов").callbackData(COMMAND_CYNOLOGIST_LIST)
         },
         new InlineKeyboardButton[]{
-            new InlineKeyboardButton("Список причин, почему могут отказать").callbackData(COMMAND_REASONS_FOR_REFUSAL)
+            new InlineKeyboardButton("❌ Причины отказа").callbackData(COMMAND_REASONS_FOR_REFUSAL)
         }
     ));
 
-    put(COMMAND_ABOUT, new InlineKeyboardMarkup(
-        new InlineKeyboardButton[]{
-            new InlineKeyboardButton("⏪ Назад ⏪").callbackData(COMMAND_INFO)
-        },
-        new InlineKeyboardButton[]{
-            new InlineKeyboardButton("\uD83C\uDD98 Позвать волонтера \uD83C\uDD98").callbackData(COMMAND_VOLUNTEER)
-        },
-        new InlineKeyboardButton[]{
-            new InlineKeyboardButton("\uD83C\uDFE0 Переход на главную страницу \uD83C\uDFE0").callbackData(COMMAND_MAIN)
-        },
-        new InlineKeyboardButton[]{
-            new InlineKeyboardButton("🐱🐶 Выбор приюта 🐶🐱").callbackData(COMMAND_START)
-        }
-    ));
+    put(COMMAND_ABOUT, new InlineKeyboardMarkup(new InlineKeyboardButton("⏪ Назад ⏪").callbackData(COMMAND_INFO)));
     put(COMMAND_ADDRESS, get(COMMAND_ABOUT));
     put(COMMAND_GUARD, get(COMMAND_ABOUT));
     put(COMMAND_SAFETY, get(COMMAND_ABOUT));
 
-    put(COMMAND_CYNOLOGIST_LIST + "_DOG", new InlineKeyboardMarkup(
-        new InlineKeyboardButton[]{
-            new InlineKeyboardButton("⏪ Назад ⏪").callbackData(COMMAND_HOW_TO_PET)
-        },
-        new InlineKeyboardButton[]{
-            new InlineKeyboardButton("\uD83C\uDD98 Позвать волонтера \uD83C\uDD98").callbackData(COMMAND_VOLUNTEER)
-        },
-        new InlineKeyboardButton[]{
-            new InlineKeyboardButton("\uD83C\uDFE0 Переход на главную страницу \uD83C\uDFE0").callbackData(COMMAND_MAIN)
-        },
-        new InlineKeyboardButton[]{
-            new InlineKeyboardButton("🐱🐶 Выбор приюта 🐶🐱").callbackData(COMMAND_START)
-        }
-    ));
+    put(COMMAND_CYNOLOGIST_LIST + "_DOG", new InlineKeyboardMarkup(new InlineKeyboardButton("⏪ Назад ⏪").callbackData(COMMAND_HOW_TO_PET)));
 
     put(COMMAND_CYNOLOGIST_ADVICE + "_DOG", get(COMMAND_CYNOLOGIST_LIST + "_DOG"));
     put(COMMAND_TRANSPORTATION, get(COMMAND_CYNOLOGIST_LIST + "_DOG"));
@@ -163,17 +130,7 @@ public class CallbackUtils {
     put(COMMAND_PLACE_PREPARATION, get(COMMAND_CYNOLOGIST_LIST + "_DOG"));
     put(COMMAND_REASONS_FOR_REFUSAL, get(COMMAND_CYNOLOGIST_LIST + "_DOG"));
 
-    put(COMMAND_SEND_CONTACTS, new InlineKeyboardMarkup(
-        new InlineKeyboardButton[]{
-            new InlineKeyboardButton("\uD83C\uDD98 Позвать волонтера \uD83C\uDD98").callbackData(COMMAND_VOLUNTEER)
-        },
-        new InlineKeyboardButton[]{
-            new InlineKeyboardButton("\uD83C\uDFE0 Переход на главную страницу \uD83C\uDFE0").callbackData(COMMAND_MAIN)
-        },
-        new InlineKeyboardButton[]{
-            new InlineKeyboardButton("🐱🐶 Выбор приюта 🐶🐱").callbackData(COMMAND_START)
-        }
-    ));
+    put(COMMAND_SEND_CONTACTS, new InlineKeyboardMarkup(new InlineKeyboardButton("⏪ Назад ⏪").callbackData(COMMAND_MAIN)));
 
     put(COMMAND_SEND_REPORT, get(COMMAND_SEND_CONTACTS));
   }};

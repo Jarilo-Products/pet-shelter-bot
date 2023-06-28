@@ -5,6 +5,7 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.request.SendPhoto;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -515,14 +516,25 @@ class TelegramBotUpdatesListenerTest {
   private void checkResponse(String input, String expectedOutput, int times) throws URISyntaxException, IOException {
     Update update = processUpdate(input);
 
-    ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
-    verify(telegramBot, times(times)).execute(argumentCaptor.capture());
-    SendMessage actual = argumentCaptor.getValue();
+    if (input.startsWith(COMMAND_START) || input.equals("2134125")) {
+      ArgumentCaptor<SendPhoto> argumentCaptor = ArgumentCaptor.forClass(SendPhoto.class);
+      verify(telegramBot, times(times)).execute(argumentCaptor.capture());
+      SendPhoto actual = argumentCaptor.getValue();
 
-    Assertions.assertEquals(actual.getParameters().get("chat_id"),
-        update.message().chat().id());
-    Assertions.assertEquals(actual.getParameters().get("text"),
-        expectedOutput);
+      Assertions.assertEquals(actual.getParameters().get("chat_id"),
+          update.message().chat().id());
+      Assertions.assertEquals(actual.getParameters().get("caption"),
+          expectedOutput);
+    } else {
+      ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+      verify(telegramBot, times(times)).execute(argumentCaptor.capture());
+      SendMessage actual = argumentCaptor.getValue();
+
+      Assertions.assertEquals(actual.getParameters().get("chat_id"),
+          update.message().chat().id());
+      Assertions.assertEquals(actual.getParameters().get("text"),
+          expectedOutput);
+    }
   }
 
   private Update processUpdate(String input) throws URISyntaxException, IOException {
@@ -534,7 +546,11 @@ class TelegramBotUpdatesListenerTest {
         Path.of(TelegramBotUpdatesListenerTest.class.getResource("response.json").toURI()));
     SendResponse sendResponse = BotUtils.fromJson(json, SendResponse.class);
 
-    when(telegramBot.execute(any(SendMessage.class))).thenReturn(sendResponse);
+    if (input.startsWith(COMMAND_START) || input.equals("2134125")) {
+      when(telegramBot.execute(any(SendPhoto.class))).thenReturn(sendResponse);
+    } else {
+      when(telegramBot.execute(any(SendMessage.class))).thenReturn(sendResponse);
+    }
 
     telegramBotUpdatesListener.process(Collections.singletonList(update));
 
