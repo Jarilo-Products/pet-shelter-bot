@@ -16,7 +16,7 @@ https://t.me/JP_pet_shelter_bot </br>
 
 ## Схема базы данных
 
-![DB schema](/public.png)
+![DB schema](/schema.png)
 
 ## Команды для работы с докером
 

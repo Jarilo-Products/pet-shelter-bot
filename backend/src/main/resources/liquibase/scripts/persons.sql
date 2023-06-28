@@ -23,6 +23,7 @@ ALTER TABLE persons
 -- changeset safgbad:3
 ALTER TABLE persons
     ADD COLUMN is_volunteer BOOLEAN NOT NULL DEFAULT FALSE;
+
 -- changeset lolipis:4
 ALTER TABLE persons
 DROP CONSTRAINT persons_pkey;

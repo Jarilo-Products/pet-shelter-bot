@@ -32,4 +32,5 @@ public class GlobalExceptionHandler {
   public ResponseEntity<String> handleException(NotFoundException e) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
   }
+
 }

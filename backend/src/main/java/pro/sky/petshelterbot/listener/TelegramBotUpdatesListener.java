@@ -2,11 +2,12 @@ package pro.sky.petshelterbot.listener;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
+import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import pro.sky.petshelterbot.processor.TextMessageProcessor;
+import pro.sky.petshelterbot.processor.MessageProcessor;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -16,12 +17,12 @@ import java.util.List;
 public class TelegramBotUpdatesListener implements UpdatesListener {
 
   private final TelegramBot telegramBot;
-  private final TextMessageProcessor textMessageProcessor;
+  private final MessageProcessor messageProcessor;
 
   public TelegramBotUpdatesListener(TelegramBot telegramBot,
-                                    TextMessageProcessor textMessageProcessor) {
+                                    MessageProcessor messageProcessor) {
     this.telegramBot = telegramBot;
-    this.textMessageProcessor = textMessageProcessor;
+    this.messageProcessor = messageProcessor;
   }
 
   @PostConstruct
@@ -33,11 +34,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
   public int process(List<Update> updates) {
     try {
       updates.stream()
-          .filter(update -> update.message() != null)
+          .filter(update -> update.message() != null || update.callbackQuery() != null)
           .forEach(update -> {
             log.info("Processing update: {}", update);
             Message message = update.message();
-            textMessageProcessor.processTextMessage(message);
+            CallbackQuery callbackQuery = update.callbackQuery();
+            messageProcessor.processTextMessage(message, callbackQuery);
           });
     } catch (Exception e) {
       log.error(e.getMessage(), e);

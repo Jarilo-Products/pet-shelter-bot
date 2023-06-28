@@ -10,7 +10,7 @@ class TelegramBotConfigurationTest {
   private final TelegramBotConfiguration out = new TelegramBotConfiguration();
 
   @Test
-  void telegramBotTest() {
+  public void telegramBotTest() {
     String token = "abc123";
     TelegramBot telegramBot = out.telegramBot(token);
     assertEquals(token, telegramBot.getToken());

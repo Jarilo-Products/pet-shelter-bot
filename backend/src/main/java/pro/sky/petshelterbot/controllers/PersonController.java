@@ -3,7 +3,6 @@ package pro.sky.petshelterbot.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pro.sky.petshelterbot.model.Person;
@@ -68,7 +67,7 @@ public class PersonController {
       )
   })
   public ResponseEntity<?> getAllVolunteer() {
-    List<Person> allVolunteer = personService.getAllVolunteer();
+    List<Person> allVolunteer = personService.getVolunteers();
     if (!allVolunteer.isEmpty()) {
       return ResponseEntity.ok(allVolunteer);
     } else {
@@ -134,9 +133,9 @@ public class PersonController {
 
   @PatchMapping("/assignAnimal/{chat_id}/{id}")
   @Operation(summary = "Назначает животное человеку")
-  public ResponseEntity<HttpStatus> assignTheAnimalToThePerson(@PathVariable Long chat_id,
-                                                               @PathVariable Long id) {
-      personService.addAnAnimalToAPerson(chat_id, id);
-      return ResponseEntity.ok(HttpStatus.OK);
+  public void assignTheAnimalToThePerson(@PathVariable Long chat_id,
+                                         @PathVariable Long id) {
+    personService.addAnAnimalToAPerson(chat_id, id);
   }
+
 }

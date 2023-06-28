@@ -28,4 +28,6 @@ public class LastCommand {
   @Enumerated(EnumType.STRING)
   private Type activeType;
 
+  private Integer lastMessageId;
+
 }

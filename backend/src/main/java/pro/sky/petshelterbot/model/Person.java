@@ -50,8 +50,14 @@ public class Person {
   @Column(nullable = false)
   private Boolean isVolunteer;
 
-  public Person(Long chatId, String firstName, String lastName, String middleName, LocalDate birthdate,
-                String phone, String email, String address) {
+  public Person(Long chatId,
+                String firstName,
+                String lastName,
+                String middleName,
+                LocalDate birthdate,
+                String phone,
+                String email,
+                String address) {
     this.chatId = chatId;
     this.firstName = firstName;
     this.lastName = lastName;
