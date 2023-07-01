@@ -91,6 +91,10 @@ public class ReportScheduler extends MessageSendingClass {
                     .callbackData("[PROBATION-" + reportSender.getChatId() + "] 14"),
                 new InlineKeyboardButton("+30 дней")
                     .callbackData("[PROBATION-" + reportSender.getChatId() + "] 30")
+            },
+            new InlineKeyboardButton[]{
+                new InlineKeyboardButton("Отказать в усыновлении")
+                    .callbackData("[PROBATION-" + reportSender.getChatId() + "] refuse")
             }
         );
       } else {

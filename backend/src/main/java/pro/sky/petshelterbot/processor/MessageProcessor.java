@@ -255,7 +255,7 @@ public class MessageProcessor extends MessageSendingClass {
     TelegramMessage messageToUser = new TelegramMessage(lastCommand.getChatId());
     if (volunteers.isEmpty()) {
       messageToUser.setText(ANSWERS.get(COMMAND_VOLUNTEER_EMPTY));
-      Integer messageId = sendMessage(messageToUser, BUTTONS.get(COMMAND_MAIN));
+      Integer messageId = sendMessage(messageToUser, BUTTONS.get(COMMAND_VOLUNTEER_EMPTY));
       lastCommand.setIsClosed(true);
       lastCommand.setLastCommand(COMMAND_VOLUNTEER);
       lastCommand.setLastMessageId(messageId);
@@ -333,7 +333,7 @@ public class MessageProcessor extends MessageSendingClass {
       lastCommand.setIsClosed(false);
     } else {
       message.setText(ANSWERS.get(COMMAND_NO_PET_REPORT));
-      messageId = sendMessage(message, BUTTONS.get(COMMAND_MAIN));
+      messageId = sendMessage(message, BUTTONS.get(COMMAND_NO_PET_REPORT));
     }
     lastCommand.setLastMessageId(messageId);
   }

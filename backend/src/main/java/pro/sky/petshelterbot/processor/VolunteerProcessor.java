@@ -35,6 +35,8 @@ import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATIO
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATION_END_VOLUNTEER;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATION_EXTENDED_USER;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATION_EXTENDED_VOLUNTEER;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATION_REFUSED_USER;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATION_REFUSED_VOLUNTEER;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_WARNING_SENT;
 
 @Component
@@ -164,6 +166,20 @@ public class VolunteerProcessor extends MessageSendingClass {
       Pet pet = reportingPerson.getPet();
       pet.setStatus(Status.ADOPTED);
       petService.save(pet);
+    } else if (answer.equalsIgnoreCase("refuse")) {
+      messageToVolunteer.setText(ANSWERS.get(COMMAND_VOLUNTEER_PROBATION_REFUSED_VOLUNTEER)
+          .replace("user_chat_id", userChatId.toString()));
+      sendMessage(messageToVolunteer);
+
+      messageToUser.setText(ANSWERS.get(COMMAND_VOLUNTEER_PROBATION_REFUSED_USER));
+      sendMessage(messageToUser);
+
+      Pet pet = reportingPerson.getPet();
+      pet.setStatus(Status.OWNERLESS);
+      petService.save(pet);
+
+      reportingPerson.setPet(null);
+      personService.save(reportingPerson);
     } else {
       try {
         Integer daysToAddToProbation = Integer.parseInt(answer);

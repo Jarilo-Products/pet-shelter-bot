@@ -10,15 +10,23 @@ https://t.me/JP_pet_shelter_bot </br>
 - Тыщенко Евгений
 
 ## Стек технологий
-- Spring Boot
-- PostgreSQL
-- Liquibase
+- Java 17, Maven
+- Spring Boot 2.7.12, Spring Data JPA
+- Pengrad Telegram Bot API
+- PostgreSQL, H2 Database (tests), Liquibase
+- Swagger
+- Lombok
 
 ## Схема базы данных
 
 ![DB schema](/schema.png)
 
 ## Команды для работы с докером
+
+### Собрать образы:
+```bash
+docker compose build --no-cache
+```
 
 ### Собрать недостающие образы, запустить контейнеры:
 ```bash

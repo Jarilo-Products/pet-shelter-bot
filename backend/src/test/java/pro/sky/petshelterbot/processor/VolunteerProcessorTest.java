@@ -47,6 +47,8 @@ import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATIO
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATION_END_VOLUNTEER;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATION_EXTENDED_USER;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATION_EXTENDED_VOLUNTEER;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATION_REFUSED_USER;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_PROBATION_REFUSED_VOLUNTEER;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_WARNING_SENT;
 
 @ExtendWith(MockitoExtension.class)
@@ -230,6 +232,42 @@ class VolunteerProcessorTest {
 
     assertEquals(pet.getStatus(), Status.ADOPTED);
     verify(petService).save(pet);
+  }
+
+  @Test
+  public void volunteerRefusingTheProbationTest() {
+    TelegramMessage telegramMessage = new TelegramMessage(1, "[PROBATION-2] refuse");
+
+    LastCommand lastCommand = new LastCommand();
+    lastCommand.setChatId(2L);
+
+    Pet pet = new Pet();
+
+    Person person = new Person();
+    person.setChatId(2L);
+    person.setPet(pet);
+
+    when(lastCommandService.getByChatId(2L)).thenReturn(Optional.of(lastCommand));
+    when(personService.getPersonByChatId(2L)).thenReturn(Optional.of(person));
+    when(telegramBot.execute(any(SendMessage.class))).thenReturn(response);
+
+    volunteerProcessor.processVolunteersMessage(telegramMessage);
+
+    ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+    verify(telegramBot, times(2)).execute(argumentCaptor.capture());
+    List<SendMessage> actual = argumentCaptor.getAllValues();
+
+    assertEquals(actual.get(0).getParameters().get("chat_id"), 1L);
+    assertEquals(actual.get(0).getParameters().get("text"), ANSWERS.get(COMMAND_VOLUNTEER_PROBATION_REFUSED_VOLUNTEER)
+        .replace("user_chat_id", person.getChatId().toString()));
+
+    assertEquals(actual.get(1).getParameters().get("chat_id"), 2L);
+    assertEquals(actual.get(1).getParameters().get("text"), ANSWERS.get(COMMAND_VOLUNTEER_PROBATION_REFUSED_USER));
+
+    assertEquals(pet.getStatus(), Status.OWNERLESS);
+    assertNull(person.getPet());
+    verify(petService).save(pet);
+    verify(personService).save(person);
   }
 
   @Test

@@ -62,6 +62,8 @@ public class TextUtils {
   public static final String COMMAND_VOLUNTEER_NO_PERSON = "/volunteer_no_person";
   public static final String COMMAND_VOLUNTEER_PROBATION_END_VOLUNTEER = "/volunteer_probation_end_volunteer";
   public static final String COMMAND_VOLUNTEER_PROBATION_END_USER = "/volunteer_probation_end_user";
+  public static final String COMMAND_VOLUNTEER_PROBATION_REFUSED_VOLUNTEER = "/volunteer_probation_refused_volunteer";
+  public static final String COMMAND_VOLUNTEER_PROBATION_REFUSED_USER = "/volunteer_probation_refused_user";
   public static final String COMMAND_VOLUNTEER_PROBATION_EXTENDED_VOLUNTEER = "/volunteer_probation_extended_volunteer";
   public static final String COMMAND_VOLUNTEER_PROBATION_EXTENDED_USER = "/volunteer_probation_extended_user";
   public static final String COMMAND_VOLUNTEER_PROBATION_DECISION_WRONG_FORMAT = "/volunteer_probation_decision_wrong_format";
@@ -466,13 +468,15 @@ public class TextUtils {
         Если же отчет не удовлетворяет критериям, то следует отправить следующее сообщение:
             [REPORT-user_chat_id]
         После этого пользователь получит предупреждение.
-        
+                
         Если в первой строчке указано
             [REPORT-user_chat_id] PROBATION END
         то нужно либо завершить испытательный период в случае, если пользователь добросовестно заполнял отчеты командой
             [PROBATION-user_chat_id] end
         либо указать количество дней (с текущего числа), на которое испытательный период следует продлить
             [PROBATION-user_chat_id] 14
+        Также можно отказать усыновителю:
+            [PROBATION-user_chat_id] refuse
         """);
     put(COMMAND_VOLUNTEER_BAD_REPORT, """
         Дорогой усыновитель, мы заметили, что ты заполняешь отчет не так подробно, как необходимо 😓
@@ -482,6 +486,11 @@ public class TextUtils {
     put(COMMAND_VOLUNTEER_NO_PERSON, "Пользователь с этим id не оставил своих контактных данных (и не может отправлять отчеты)");
     put(COMMAND_VOLUNTEER_PROBATION_END_VOLUNTEER, "Испытательный срок [PROBATION-user_chat_id] успешно завершен");
     put(COMMAND_VOLUNTEER_PROBATION_END_USER, "Поздравляем, Ваш испытательный срок успешно завершен 🥳");
+    put(COMMAND_VOLUNTEER_PROBATION_REFUSED_VOLUNTEER, "Испытательный срок [PROBATION-user_chat_id] не пройден. Усыновление отменено");
+    put(COMMAND_VOLUNTEER_PROBATION_REFUSED_USER, """
+        К сожалению Вам отказано в усыновлении животного по истечении испытательного срока \uD83D\uDE14
+        Пожалуйста, верните животное в приют
+        """);
     put(COMMAND_VOLUNTEER_PROBATION_EXTENDED_VOLUNTEER, "Испытательный срок [PROBATION-user_chat_id] успешно продлен");
     put(COMMAND_VOLUNTEER_PROBATION_EXTENDED_USER, "Ваш испытательный срок продлен на %DAYS% дней \uD83D\uDE1E");
     put(COMMAND_VOLUNTEER_PROBATION_DECISION_WRONG_FORMAT, "Неверный формат сообщения с решением о завершении/продлении испытательного срока!");

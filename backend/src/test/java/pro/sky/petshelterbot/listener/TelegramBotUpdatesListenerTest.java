@@ -120,7 +120,7 @@ class TelegramBotUpdatesListenerTest {
   public void firstStartCommandTest() throws URISyntaxException, IOException {
     when(lastCommandService.getByChatId(any())).thenReturn(Optional.empty());
 
-    checkResponse(COMMAND_START, ANSWERS.get(COMMAND_START), 1);
+    checkResponse(COMMAND_START, ANSWERS.get(COMMAND_START), 1, true);
     verify(lastCommandService).save(any());
   }
 
@@ -134,7 +134,7 @@ class TelegramBotUpdatesListenerTest {
     when(lastCommandService.getByChatId(any())).thenReturn(Optional.of(lastCommand));
     when(telegramBot.execute(any(DeleteMessage.class))).thenReturn(null);
 
-    checkResponse(COMMAND_START, ANSWERS.get(COMMAND_START + "_registered"), 2);
+    checkResponse(COMMAND_START, ANSWERS.get(COMMAND_START + "_registered"), 2, true);
     assertFalse(lastCommand.getIsClosed());
     assertEquals(lastCommand.getLastCommand(), COMMAND_START);
     verify(lastCommandService).save(lastCommand);
@@ -151,7 +151,7 @@ class TelegramBotUpdatesListenerTest {
     when(lastCommandService.getByChatId(any())).thenReturn(Optional.of(lastCommand));
     when(telegramBot.execute(any(DeleteMessage.class))).thenReturn(null);
 
-    checkResponse(COMMAND_MAIN_CAT, ANSWERS.get(COMMAND_MAIN_CAT), 2);
+    checkResponse(COMMAND_MAIN_CAT, ANSWERS.get(COMMAND_MAIN_CAT), 2, false);
     assertTrue(lastCommand.getIsClosed());
     assertEquals(lastCommand.getLastCommand(), COMMAND_START);
     assertEquals(lastCommand.getActiveType(), Type.CAT);
@@ -169,7 +169,7 @@ class TelegramBotUpdatesListenerTest {
     when(lastCommandService.getByChatId(any())).thenReturn(Optional.of(lastCommand));
     when(telegramBot.execute(any(DeleteMessage.class))).thenReturn(null);
 
-    checkResponse(COMMAND_MAIN_DOG, ANSWERS.get(COMMAND_MAIN_DOG), 2);
+    checkResponse(COMMAND_MAIN_DOG, ANSWERS.get(COMMAND_MAIN_DOG), 2, false);
     assertTrue(lastCommand.getIsClosed());
     assertEquals(lastCommand.getLastCommand(), COMMAND_START);
     assertEquals(lastCommand.getActiveType(), Type.DOG);
@@ -186,7 +186,7 @@ class TelegramBotUpdatesListenerTest {
 
     when(lastCommandService.getByChatId(any())).thenReturn(Optional.of(lastCommand));
 
-    checkResponse("2134125", ANSWERS.get(COMMAND_START + "_registered"), 1);
+    checkResponse("2134125", ANSWERS.get(COMMAND_START + "_registered"), 1, true);
     assertFalse(lastCommand.getIsClosed());
     assertEquals(lastCommand.getLastCommand(), COMMAND_START);
     verify(lastCommandService).save(lastCommand);
@@ -203,7 +203,7 @@ class TelegramBotUpdatesListenerTest {
     when(telegramBot.execute(any(DeleteMessage.class))).thenReturn(null);
     when(lastCommandService.getByChatId(any())).thenReturn(Optional.of(lastCommand));
 
-    checkResponse(COMMAND_INFO, ANSWERS.get(COMMAND_INFO + "_" + Type.CAT.name()), 2);
+    checkResponse(COMMAND_INFO, ANSWERS.get(COMMAND_INFO + "_" + Type.CAT.name()), 2, false);
     assertTrue(lastCommand.getIsClosed());
     assertEquals(lastCommand.getLastCommand(), COMMAND_INFO);
     verify(lastCommandService).save(lastCommand);
@@ -220,7 +220,7 @@ class TelegramBotUpdatesListenerTest {
     when(telegramBot.execute(any(DeleteMessage.class))).thenReturn(null);
     when(lastCommandService.getByChatId(any())).thenReturn(Optional.of(lastCommand));
 
-    checkResponse("abrakadabra", UNKNOWN_COMMAND, 2);
+    checkResponse("abrakadabra", UNKNOWN_COMMAND, 2, false);
   }
 
   @Test
@@ -235,7 +235,7 @@ class TelegramBotUpdatesListenerTest {
     when(lastCommandService.getByChatId(any())).thenReturn(Optional.of(lastCommand));
     when(personService.getVolunteers()).thenReturn(Collections.emptyList());
 
-    checkResponse(COMMAND_VOLUNTEER, ANSWERS.get(COMMAND_VOLUNTEER_EMPTY), 2);
+    checkResponse(COMMAND_VOLUNTEER, ANSWERS.get(COMMAND_VOLUNTEER_EMPTY), 2, false);
     assertTrue(lastCommand.getIsClosed());
     assertEquals(lastCommand.getLastCommand(), COMMAND_VOLUNTEER);
     verify(lastCommandService).save(lastCommand);
@@ -255,7 +255,7 @@ class TelegramBotUpdatesListenerTest {
     when(lastCommandService.getByChatId(any())).thenReturn(Optional.of(lastCommand));
     when(personService.getVolunteers()).thenReturn(List.of(person));
 
-    processUpdate(COMMAND_VOLUNTEER);
+    processUpdate(COMMAND_VOLUNTEER, false);
 
     ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
     verify(telegramBot, times(2)).execute(argumentCaptor.capture());
@@ -282,7 +282,7 @@ class TelegramBotUpdatesListenerTest {
     when(lastCommandService.getByChatId(2L)).thenReturn(Optional.empty());
     when(personService.isChatOfVolunteer(1L)).thenReturn(true);
 
-    checkResponse("[USER-2] smth.", ANSWERS.get(COMMAND_VOLUNTEER_NO_CHAT), 1);
+    checkResponse("[USER-2] smth.", ANSWERS.get(COMMAND_VOLUNTEER_NO_CHAT), 1, false);
   }
 
   @Test
@@ -299,7 +299,7 @@ class TelegramBotUpdatesListenerTest {
     when(lastCommandService.getByChatId(2L)).thenReturn(Optional.of(userLastCommand));
     when(personService.isChatOfVolunteer(1L)).thenReturn(true);
 
-    checkResponse("[USER-2] smth.", ANSWERS.get(COMMAND_VOLUNTEER_CHAT_NOT_OPENED), 1);
+    checkResponse("[USER-2] smth.", ANSWERS.get(COMMAND_VOLUNTEER_CHAT_NOT_OPENED), 1, false);
   }
 
   @Test
@@ -316,7 +316,7 @@ class TelegramBotUpdatesListenerTest {
     when(lastCommandService.getByChatId(2L)).thenReturn(Optional.of(userLastCommand));
     when(personService.isChatOfVolunteer(1L)).thenReturn(true);
 
-    processUpdate("[USER-2] smth.");
+    processUpdate("[USER-2] smth.", false);
 
     ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
     verify(telegramBot).execute(argumentCaptor.capture());
@@ -340,7 +340,7 @@ class TelegramBotUpdatesListenerTest {
     when(lastCommandService.getByChatId(2L)).thenReturn(Optional.of(userLastCommand));
     when(personService.isChatOfVolunteer(1L)).thenReturn(true);
 
-    processUpdate("[USER-2] end");
+    processUpdate("[USER-2] end", false);
 
     ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
     verify(telegramBot, times(2)).execute(argumentCaptor.capture());
@@ -367,7 +367,7 @@ class TelegramBotUpdatesListenerTest {
 
     when(lastCommandService.getByChatId(1L)).thenReturn(Optional.of(lastCommand));
 
-    processUpdate("smth.");
+    processUpdate("smth.", false);
 
     ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
     verify(telegramBot).execute(argumentCaptor.capture());
@@ -387,7 +387,7 @@ class TelegramBotUpdatesListenerTest {
     when(telegramBot.execute(any(DeleteMessage.class))).thenReturn(null);
     when(lastCommandService.getByChatId(any())).thenReturn(Optional.of(lastCommand));
 
-    checkResponse(COMMAND_SEND_CONTACTS, ANSWERS.get(COMMAND_SEND_CONTACTS), 2);
+    checkResponse(COMMAND_SEND_CONTACTS, ANSWERS.get(COMMAND_SEND_CONTACTS), 2, false);
     assertFalse(lastCommand.getIsClosed());
     assertEquals(lastCommand.getLastCommand(), COMMAND_SEND_CONTACTS);
     verify(lastCommandService).save(lastCommand);
@@ -405,7 +405,7 @@ class TelegramBotUpdatesListenerTest {
 
     when(lastCommandService.getByChatId(any())).thenReturn(Optional.of(lastCommand));
 
-    checkResponse(contacts, ANSWERS.get(COMMAND_SEND_CONTACTS_NOT_ENOUGH), 1);
+    checkResponse(contacts, ANSWERS.get(COMMAND_SEND_CONTACTS_NOT_ENOUGH), 1, false);
   }
 
   @Test
@@ -429,7 +429,7 @@ class TelegramBotUpdatesListenerTest {
     checkResponse(contacts, ANSWERS.get(COMMAND_SEND_CONTACTS_INVALID_NAME)
         + '\n' + ANSWERS.get(COMMAND_SEND_CONTACTS_INVALID_BIRTHDATE)
         + '\n' + ANSWERS.get(COMMAND_SEND_CONTACTS_INVALID_EMAIL)
-        + '\n' + ANSWERS.get(COMMAND_SEND_CONTACTS_INVALID), 1);
+        + '\n' + ANSWERS.get(COMMAND_SEND_CONTACTS_INVALID), 1, false);
   }
 
   @Test
@@ -460,7 +460,7 @@ class TelegramBotUpdatesListenerTest {
 
     when(lastCommandService.getByChatId(any())).thenReturn(Optional.of(lastCommand));
 
-    checkResponse(contacts, ANSWERS.get(COMMAND_SEND_CONTACTS_ACCEPTED), 1);
+    checkResponse(contacts, ANSWERS.get(COMMAND_SEND_CONTACTS_ACCEPTED), 1, false);
 
     assertTrue(lastCommand.getIsClosed());
 
@@ -493,7 +493,7 @@ class TelegramBotUpdatesListenerTest {
     when(lastCommandService.getByChatId(any())).thenReturn(Optional.of(lastCommand));
     when(personService.getPersonByChatId(1L)).thenReturn(Optional.of(person));
 
-    checkResponse(COMMAND_SEND_REPORT, ANSWERS.get(COMMAND_SEND_REPORT), 2);
+    checkResponse(COMMAND_SEND_REPORT, ANSWERS.get(COMMAND_SEND_REPORT), 2, false);
     assertFalse(lastCommand.getIsClosed());
     assertEquals(lastCommand.getLastCommand(), COMMAND_SEND_REPORT);
     verify(lastCommandService).save(lastCommand);
@@ -510,13 +510,16 @@ class TelegramBotUpdatesListenerTest {
     when(lastCommandService.getByChatId(any())).thenReturn(Optional.of(lastCommand));
     when(personService.getPersonByChatId(1L)).thenReturn(Optional.empty());
 
-    checkResponse(COMMAND_SEND_REPORT, ANSWERS.get(COMMAND_NO_PET_REPORT), 2);
+    checkResponse(COMMAND_SEND_REPORT, ANSWERS.get(COMMAND_NO_PET_REPORT), 2, false);
   }
 
-  private void checkResponse(String input, String expectedOutput, int times) throws URISyntaxException, IOException {
-    Update update = processUpdate(input);
+  private void checkResponse(String input,
+                             String expectedOutput,
+                             int times,
+                             boolean isPhoto) throws URISyntaxException, IOException {
+    Update update = processUpdate(input, isPhoto);
 
-    if (input.startsWith(COMMAND_START) || input.equals("2134125")) {
+    if (isPhoto) {
       ArgumentCaptor<SendPhoto> argumentCaptor = ArgumentCaptor.forClass(SendPhoto.class);
       verify(telegramBot, times(times)).execute(argumentCaptor.capture());
       SendPhoto actual = argumentCaptor.getValue();
@@ -537,7 +540,7 @@ class TelegramBotUpdatesListenerTest {
     }
   }
 
-  private Update processUpdate(String input) throws URISyntaxException, IOException {
+  private Update processUpdate(String input, boolean isPhoto) throws URISyntaxException, IOException {
     String json = Files.readString(
         Path.of(TelegramBotUpdatesListenerTest.class.getResource("update.json").toURI()));
     Update update = BotUtils.fromJson(
@@ -546,7 +549,7 @@ class TelegramBotUpdatesListenerTest {
         Path.of(TelegramBotUpdatesListenerTest.class.getResource("response.json").toURI()));
     SendResponse sendResponse = BotUtils.fromJson(json, SendResponse.class);
 
-    if (input.startsWith(COMMAND_START) || input.equals("2134125")) {
+    if (isPhoto) {
       when(telegramBot.execute(any(SendPhoto.class))).thenReturn(sendResponse);
     } else {
       when(telegramBot.execute(any(SendMessage.class))).thenReturn(sendResponse);

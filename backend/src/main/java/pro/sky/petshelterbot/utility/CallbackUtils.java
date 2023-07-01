@@ -18,6 +18,7 @@ import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_CYNOLOGIST_LIST;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_MAIN;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_MAIN_CAT;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_MAIN_DOG;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_NO_PET_REPORT;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_PLACE_PREPARATION;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_REASONS_FOR_REFUSAL;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_SAFETY;
@@ -25,6 +26,7 @@ import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_SEND_CONTACTS;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_SEND_REPORT;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_START;
 import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_TRANSPORTATION;
+import static pro.sky.petshelterbot.utility.TextUtils.COMMAND_VOLUNTEER_EMPTY;
 
 public class CallbackUtils {
 
@@ -133,6 +135,8 @@ public class CallbackUtils {
     put(COMMAND_SEND_CONTACTS, new InlineKeyboardMarkup(new InlineKeyboardButton("⏪ Назад ⏪").callbackData(COMMAND_MAIN)));
 
     put(COMMAND_SEND_REPORT, get(COMMAND_SEND_CONTACTS));
+    put(COMMAND_NO_PET_REPORT, get(COMMAND_SEND_CONTACTS));
+    put(COMMAND_VOLUNTEER_EMPTY, get(COMMAND_SEND_CONTACTS));
   }};
 
 }
