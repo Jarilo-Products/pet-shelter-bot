@@ -6,8 +6,6 @@ import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -20,11 +18,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class Person {
-
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
-
   @Column(nullable = false)
   private Long chatId;
 
@@ -56,8 +50,14 @@ public class Person {
   @Column(nullable = false)
   private Boolean isVolunteer;
 
-  public Person(Long chatId, String firstName, String lastName, String middleName, LocalDate birthdate,
-                String phone, String email, String address) {
+  public Person(Long chatId,
+                String firstName,
+                String lastName,
+                String middleName,
+                LocalDate birthdate,
+                String phone,
+                String email,
+                String address) {
     this.chatId = chatId;
     this.firstName = firstName;
     this.lastName = lastName;

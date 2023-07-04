@@ -15,7 +15,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
+// TODO: переделать getAllTest
 @ExtendWith(MockitoExtension.class)
 class PetServiceTest {
 
@@ -26,10 +26,11 @@ class PetServiceTest {
 
   @InjectMocks
   private PetService petService;
+  private static Pet pet1;
 
   @BeforeAll
   public static void initPets() {
-    Pet pet1 = new Pet();
+    pet1 = new Pet();
     pet1.setId(1L);
     Pet pet2 = new Pet();
     pet2.setId(2L);
@@ -69,4 +70,5 @@ class PetServiceTest {
 
     verify(petRepository, times(1)).deletePetById(1L);
   }
+
 }

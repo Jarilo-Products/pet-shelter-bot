@@ -30,10 +30,10 @@ public class Report {
   private Pet pet;
 
   @ManyToOne
-  @JoinColumn(name = "person_id", nullable = false)
+  @JoinColumn(name = "chat_id", nullable = false)
   private Person person;
 
-  private String imagePath;
+  private String fileId;
 
   @Column(nullable = false)
   private String text;

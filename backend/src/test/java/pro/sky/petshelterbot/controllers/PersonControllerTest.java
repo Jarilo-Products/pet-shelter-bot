@@ -37,9 +37,7 @@ class PersonControllerTest {
     mockMvc.perform(post("/persons")
             .contentType(MediaType.APPLICATION_JSON)
             .content(json.toString()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").isNotEmpty())
-        .andExpect(jsonPath("$.id").value(1));
+        .andExpect(status().isOk());
 
     mockMvc.perform(get("/persons"))
         .andExpect(status().isOk())
@@ -62,9 +60,7 @@ class PersonControllerTest {
     mockMvc.perform(post("/persons")
             .contentType(MediaType.APPLICATION_JSON)
             .content(json.toString()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").isNotEmpty())
-        .andExpect(jsonPath("$.id").value(1));
+        .andExpect(status().isOk());
 
     json = new JSONObject();
     json.put("chatId", "200");
@@ -75,9 +71,7 @@ class PersonControllerTest {
     mockMvc.perform(post("/persons")
             .contentType(MediaType.APPLICATION_JSON)
             .content(json.toString()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").isNotEmpty())
-        .andExpect(jsonPath("$.id").value(2));
+        .andExpect(status().isOk());
 
     mockMvc.perform(get("/persons/volunteers"))
         .andExpect(status().isOk())
@@ -88,7 +82,7 @@ class PersonControllerTest {
 
   @Test
   public void changeIsVolunteerIsTrue() throws Exception {
-    mockMvc.perform(patch("/persons/volunteers/1"))
+    mockMvc.perform(patch("/persons/volunteers/100"))
         .andExpect(status().isNotFound());
 
     JSONObject json = new JSONObject();
@@ -100,17 +94,15 @@ class PersonControllerTest {
     mockMvc.perform(post("/persons")
             .contentType(MediaType.APPLICATION_JSON)
             .content(json.toString()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").isNotEmpty())
-        .andExpect(jsonPath("$.id").value(1));
+        .andExpect(status().isOk());
 
-    mockMvc.perform(patch("/persons/volunteers/1"))
+    mockMvc.perform(patch("/persons/volunteers/100"))
         .andExpect(status().isOk());
   }
 
   @Test
   public void changeIsVolunteerIsFalse() throws Exception {
-    mockMvc.perform(patch("/persons/volunteers/1/revoke"))
+    mockMvc.perform(patch("/persons/volunteers/100/revoke"))
         .andExpect(status().isNotFound());
 
     JSONObject json = new JSONObject();
@@ -122,12 +114,43 @@ class PersonControllerTest {
     mockMvc.perform(post("/persons")
             .contentType(MediaType.APPLICATION_JSON)
             .content(json.toString()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").isNotEmpty())
-        .andExpect(jsonPath("$.id").value(1));
+        .andExpect(status().isOk());
 
-    mockMvc.perform(patch("/persons/volunteers/1/revoke"))
+    mockMvc.perform(patch("/persons/volunteers/100/revoke"))
         .andExpect(status().isOk());
   }
 
+  @Test
+  public void shouldAssignTheAnimalToThePerson() throws Exception {
+    mockMvc.perform(patch("/persons/assignAnimal/100/1"))
+        .andExpect(status().isNotFound());
+
+    JSONObject json = new JSONObject();
+    json.put("chatId", "100");
+    json.put("firstName", "Ivan");
+    json.put("lastName", "Ivanov");
+    json.put("birthdate", "2000-01-01");
+    json.put("isVolunteer", "false");
+    mockMvc.perform(post("/persons")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json.toString()))
+        .andExpect(status().isOk());
+
+    json = new JSONObject();
+    json.put("type", "CAT");
+    json.put("name", "Lucy");
+    json.put("birthdate", "2010-06-24");
+    json.put("healthStatus", "HEALTHY");
+    json.put("sex", "FEMALE");
+    mockMvc.perform(post("/pets")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json.toString()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").isNotEmpty())
+        .andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.status").value("OWNERLESS"));
+
+    mockMvc.perform(patch("/persons/assignAnimal/100/1"))
+        .andExpect(status().isOk());
+  }
 }

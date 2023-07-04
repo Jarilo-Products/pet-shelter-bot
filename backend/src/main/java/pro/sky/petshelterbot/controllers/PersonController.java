@@ -24,7 +24,7 @@ public class PersonController {
   @GetMapping
   @Operation(
       summary = "Получаем всех людей.",
-      description = "Можно получить все личности, соответсвующие обекту Person")
+      description = "Можно получить все личности, соответствующие объекту Person")
   @ApiResponses(value = {
       @ApiResponse(
           responseCode = "200",
@@ -50,7 +50,7 @@ public class PersonController {
 
   @GetMapping("/volunteers")
   @Operation(
-      summary = "Получаем всех волентеров.",
+      summary = "Получаем всех волонтеров.",
       description = "Можно получить всех волонтеров, работающих в приюте")
   @ApiResponses(value = {
       @ApiResponse(
@@ -67,7 +67,7 @@ public class PersonController {
       )
   })
   public ResponseEntity<?> getAllVolunteer() {
-    List<Person> allVolunteer = personService.getAllVolunteer();
+    List<Person> allVolunteer = personService.getVolunteers();
     if (!allVolunteer.isEmpty()) {
       return ResponseEntity.ok(allVolunteer);
     } else {
@@ -75,9 +75,9 @@ public class PersonController {
     }
   }
 
-  @PatchMapping("/volunteers/{id}")
+  @PatchMapping("/volunteers/{chat_id}")
   @Operation(
-      summary = "Обновляет информацию о личности по ее id.",
+      summary = "Обновляет информацию о личности по ее chat_id.",
       description = "Для присвоения статуса - волонтер, необходимо выбрать true")
 
   @ApiResponses(value = {
@@ -94,13 +94,13 @@ public class PersonController {
           description = "произошла ошибка, не зависящая от вызывающей стороны"
       )
   })
-  public ResponseEntity<?> changeIsVolunteerIsTrue(@PathVariable Long id) {
-    Optional<Person> person = personService.getPersonById(id);
+  public ResponseEntity<?> changeIsVolunteerIsTrue(@PathVariable Long chat_id) {
+    Optional<Person> person = personService.getPersonByChatId(chat_id);
     person.ifPresent(personService::setPersonIsVolunteerIsTrue);
     return ResponseEntity.of(person);
   }
 
-  @PatchMapping("/volunteers/{id}/revoke")
+  @PatchMapping("/volunteers/{chat_id}/revoke")
   @Operation(
       summary = "Обновляет информацию о личности по ее id.",
       description = "Для отзыва статуса - волонтер, необходимо выбрать false")
@@ -118,8 +118,8 @@ public class PersonController {
           description = "произошла ошибка, не зависящая от вызывающей стороны"
       )
   })
-  public ResponseEntity<?> changeIsVolunteerIsFalse(@PathVariable Long id) {
-    Optional<Person> person = personService.getPersonById(id);
+  public ResponseEntity<?> changeIsVolunteerIsFalse(@PathVariable Long chat_id) {
+    Optional<Person> person = personService.getPersonByChatId(chat_id);
     person.ifPresent(personService::setPersonIsVolunteerIsFalse);
     return ResponseEntity.of(person);
   }
@@ -129,6 +129,13 @@ public class PersonController {
   public Person addPerson(@RequestBody Person person) {
     personService.save(person);
     return person;
+  }
+
+  @PatchMapping("/assignAnimal/{chat_id}/{id}")
+  @Operation(summary = "Назначает животное человеку")
+  public void assignTheAnimalToThePerson(@PathVariable Long chat_id,
+                                         @PathVariable Long id) {
+    personService.addAnAnimalToAPerson(chat_id, id);
   }
 
 }

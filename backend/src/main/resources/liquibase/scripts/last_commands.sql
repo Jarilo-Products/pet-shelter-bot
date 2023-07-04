@@ -16,3 +16,7 @@ ALTER TABLE last_commands
 ALTER TABLE last_commands
     DROP COLUMN active_pet,
     ADD COLUMN active_type VARCHAR;
+
+-- changeset safgbad:4
+ALTER TABLE last_commands
+    ADD COLUMN last_message_id INTEGER;

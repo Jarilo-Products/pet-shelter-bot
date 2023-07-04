@@ -31,9 +31,9 @@ class PersonServiceTest {
   @BeforeAll
   public static void initPersons() {
     Person person1 = new Person();
-    person1.setId(1L);
+    person1.setChatId(1L);
     Person person2 = new Person();
-    person1.setId(2L);
+    person1.setChatId(2L);
     persons = new ArrayList<>();
     persons.add(person1);
     persons.add(person2);
@@ -50,19 +50,19 @@ class PersonServiceTest {
   public void getAllVolunteerTest() {
     when(personRepository.getPeopleByIsVolunteerIsTrue()).thenReturn(persons);
 
-    assertEquals(personService.getAllVolunteer(), persons);
+    assertEquals(personService.getVolunteers(), persons);
   }
 
   @Test
   public void getPersonByIdTest() {
     Person person = new Person();
-    person.setId(1L);
+    person.setChatId(1L);
 
-    when(personRepository.findPersonById(1L)).thenReturn(Optional.of(person));
-    when(personRepository.findPersonById(2L)).thenReturn(Optional.empty());
+    when(personRepository.getPersonByChatId(1L)).thenReturn(Optional.of(person));
+    when(personRepository.getPersonByChatId(2L)).thenReturn(Optional.empty());
 
-    Optional<Person> presentPerson = personService.getPersonById(1L);
-    Optional<Person> emptyPerson = personService.getPersonById(2L);
+    Optional<Person> presentPerson = personService.getPersonByChatId(1L);
+    Optional<Person> emptyPerson = personService.getPersonByChatId(2L);
 
     assertTrue(presentPerson.isPresent());
     assertEquals(presentPerson.get(), person);

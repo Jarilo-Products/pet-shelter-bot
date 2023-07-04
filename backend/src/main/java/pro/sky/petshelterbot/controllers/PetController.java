@@ -96,7 +96,7 @@ public class PetController {
   @ApiResponses(value = {
       @ApiResponse(
           responseCode = "200",
-          description = "удалось найти питомцев"
+          description = "удалось добавить питомца"
       ),
       @ApiResponse(
           responseCode = "400",
